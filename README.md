@@ -77,3 +77,11 @@ The scan API returns manual opportunity cards with group/source name, original
 post text, service type, urgency, town, lead score, and a suggested reply. The
 extension popup supports **Copy Reply**, **Mark Ignored**, **Mark Replied**,
 **Mark Booked**, and **Mark Won** as local manual actions.
+
+Safe automation replacements are included for prohibited flows:
+
+- Approved platform connections are modeled as OAuth/API-style scoped
+  connections, not password storage.
+- Audit events can record scans, copied replies, and manual status changes.
+- CRM follow-up tasks can be created outside Facebook for booked or won leads.
+- Disclosure templates keep replies honest about coming from the business.

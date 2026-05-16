@@ -12,6 +12,9 @@ This is a Manifest V3 browser extension for button-activated page scanning.
 6. LocalSignal returns HVAC/service-intent opportunity cards.
 7. The user can copy a suggested reply or mark cards ignored, replied, booked,
    or won.
+8. LocalSignal records audit events for scans, copied replies, and manual
+   status changes.
+9. Booked and won outcomes can create CRM follow-up tasks outside Facebook.
 
 ## What it does not do
 
@@ -22,6 +25,16 @@ This is a Manifest V3 browser extension for button-activated page scanning.
 - No background scraping.
 - No scanning until the user clicks the button.
 - No analysis of posts that are not visible to the logged-in user.
+
+## Safe automation replacements
+
+- Approved platform connections should use official OAuth/API flows with scoped
+  tokens when available; do not store Facebook passwords.
+- Replies must identify the business honestly and never claim customer
+  experience.
+- CRM follow-up tasks can be created for phone, email, or CRM workflows outside
+  Facebook.
+- Audit logs document user-triggered scans and manual actions.
 
 ## Local testing
 

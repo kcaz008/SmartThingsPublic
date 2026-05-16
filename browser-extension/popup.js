@@ -61,6 +61,14 @@ scanButton.addEventListener("click", async () => {
     const payload = await response.json();
     cards = payload.cards || [];
     renderCards();
+    await logAuditEvent("scan_completed", "Visible page scan completed", {
+      page_url: tab.url,
+      scanned_post_count: payload.scanned_post_count,
+      opportunity_count: payload.opportunity_count,
+      source_name: payload.source_name,
+      visible_page_only: true,
+      automatic_posting: false,
+    });
     setStatus(
       `Scanned ${payload.scanned_post_count} visible posts. Found ${payload.opportunity_count} HVAC opportunities. No posting was performed.`,
     );
@@ -88,11 +96,28 @@ cardsEl.addEventListener("click", async (event) => {
 
   if (action === "copy") {
     await navigator.clipboard.writeText(card.suggested_reply);
+    await logAuditEvent("reply_copied", "Suggested reply copied manually", {
+      card_id: card.id,
+      source_name: card.group_source_name,
+      service_type: card.service_type,
+      automatic_posting: false,
+    });
     setStatus("Reply copied. Paste it manually if you choose to respond.");
     return;
   }
 
   card.status = action;
+  await logAuditEvent(`marked_${action}`, `Opportunity marked ${action}`, {
+    card_id: card.id,
+    source_name: card.group_source_name,
+    service_type: card.service_type,
+    automatic_posting: false,
+  });
+
+  if (action === "booked" || action === "won") {
+    await createCrmFollowup(card, action);
+  }
+
   renderCards();
   setStatus(`Marked opportunity as ${action}. No Facebook action was taken.`);
 });
@@ -137,6 +162,30 @@ function setStatus(message) {
 
 function normalizeApiBase(value) {
   return (value || DEFAULT_API_BASE).replace(/\/+$/, "");
+}
+
+async function logAuditEvent(eventType, eventSummary, metadata) {
+  await fetch(`${normalizeApiBase(apiBaseInput.value)}/api/audit-events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event_type: eventType,
+      event_summary: eventSummary,
+      metadata,
+    }),
+  }).catch(() => undefined);
+}
+
+async function createCrmFollowup(card, outcome) {
+  await fetch(`${normalizeApiBase(apiBaseInput.value)}/api/crm/followups`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      channel: "crm",
+      summary: `Follow up on ${outcome} LocalSignal lead from ${card.group_source_name}: ${card.service_type} in ${card.town}.`,
+      completed: false,
+    }),
+  }).catch(() => undefined);
 }
 
 function isFacebookPage(url) {
