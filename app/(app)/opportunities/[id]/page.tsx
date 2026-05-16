@@ -68,6 +68,15 @@ export default async function OpportunityDetailPage({
     serviceType: opportunity.serviceType,
     urgency: opportunity.urgency,
     town: opportunity.detectedTown,
+    secondResponderName: intelligence.recommendedSecondResponder,
+    ctaPhoneRule: business.ctaPhoneRule,
+    phoneSafeInPublic: source?.phoneSafeInPublic,
+  });
+  const timeline = buildTimeline({
+    opportunity,
+    competitorMentions,
+    reply,
+    intelligence,
   });
 
   return (
@@ -168,6 +177,36 @@ export default async function OpportunityDetailPage({
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Reply-as control
+            </p>
+            <div className="mt-5 grid gap-3 md:grid-cols-5">
+              {[
+                ["Reply as company", "Best for clear brand response."],
+                ["Reply as team member", "Personal and less promotional."],
+                ["Reply as second responder", "Use when a teammate already posted."],
+                ["DM instead", "Use when group vibe is sensitive."],
+                ["Do not reply", "Use when handled or too risky."],
+              ].map(([label, help]) => (
+                <div
+                  key={label}
+                  className={`rounded-2xl p-4 text-sm ${
+                    label === intelligence.safetyLabel ||
+                    (label === "Reply as second responder" &&
+                      intelligence.secondResponderRecommended) ||
+                    (label === "DM instead" && intelligence.safetyLabel === "DM only")
+                      ? "bg-signal-navy text-white"
+                      : "bg-slate-50 text-slate-600"
+                  }`}
+                >
+                  <p className="font-black">{label}</p>
+                  <p className="mt-2 text-xs leading-5 opacity-80">{help}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
@@ -236,6 +275,23 @@ export default async function OpportunityDetailPage({
         <aside className="space-y-6">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Coordination label
+            </p>
+            <p className="mt-3 rounded-2xl bg-signal-navy px-4 py-3 text-sm font-black text-white">
+              {intelligence.safetyLabel}
+            </p>
+            {intelligence.secondResponderRecommended ? (
+              <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+                <p className="font-bold">Second responder recommended</p>
+                <p className="mt-1">First: {intelligence.firstResponder}</p>
+                <p>Next: {intelligence.recommendedSecondResponder}</p>
+                <p className="mt-1">{intelligence.secondResponderReason}</p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
               Lead temperature
             </p>
             <div className="mt-4 space-y-4">
@@ -276,10 +332,12 @@ export default async function OpportunityDetailPage({
               {[
                 ...intelligence.adminRiskWarnings,
                 ...intelligence.embarrassmentWarnings,
+                ...intelligence.collisionWarnings,
               ].length ? (
                 [
                   ...intelligence.adminRiskWarnings,
                   ...intelligence.embarrassmentWarnings,
+                  ...intelligence.collisionWarnings,
                 ].map((warning) => (
                   <div
                     key={warning}
@@ -294,6 +352,24 @@ export default async function OpportunityDetailPage({
                   repetitive-reply warning.
                 </p>
               )}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Conversation timeline
+            </p>
+            <div className="mt-4 space-y-3">
+              {timeline.map((item) => (
+                <div key={`${item.time}-${item.text}`} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                    {item.time}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -377,4 +453,51 @@ function AnalysisRow({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-sm leading-6 text-slate-700">{value}</p>
     </div>
   );
+}
+
+function buildTimeline({
+  opportunity,
+  competitorMentions,
+  reply,
+  intelligence,
+}: {
+  opportunity: NonNullable<Awaited<ReturnType<typeof getOpportunity>>>;
+  competitorMentions: Awaited<ReturnType<typeof listCompetitorMentions>>;
+  reply: Awaited<ReturnType<typeof getReplyForOpportunity>>;
+  intelligence: ReturnType<typeof deriveLeadIntelligence>;
+}) {
+  const items = [
+    {
+      time: formatDateTime(opportunity.createdAt),
+      text: `Original post by ${opportunity.authorName}.`,
+    },
+    ...competitorMentions
+      .filter(
+        (mention) =>
+          mention.opportunityId === opportunity.id ||
+          mention.sourceId === opportunity.sourceId,
+      )
+      .map((mention) => ({
+        time: formatDateTime(mention.createdAt),
+        text: `${mention.competitorName} mentioned ${
+          mention.mentionedBeforeUs ? "before us" : "after us"
+        }.`,
+      })),
+    ...(reply?.copied
+      ? [
+          {
+            time: formatDateTime(reply.createdAt),
+            text: `${intelligence.firstResponder} replied or copied a public draft.`,
+          },
+        ]
+      : []),
+    {
+      time: "Now",
+      text: intelligence.secondResponderRecommended
+        ? `Suggested: ${intelligence.recommendedSecondResponder} should follow up.`
+        : `Suggested: ${intelligence.safetyLabel}.`,
+    },
+  ];
+
+  return items;
 }

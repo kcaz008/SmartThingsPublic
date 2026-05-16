@@ -118,6 +118,9 @@ To also verify login for a test user, set `CHECK_USER_EMAIL` and
 - Dashboard: command-center metrics, filters, source health, opportunities
 - Lead Analytics: leads by town/group, hot leads this week, response rate,
   booked/closed count, competitor mentions, follow-ups needed
+- Team Coordination: active client/brand switcher, reply-as guidance, second
+  responder recommendations, collision warnings, conversation timelines, group
+  vibe/rules, and CTA/phone-number rules
 - Add Opportunity: manual post intake with AI analysis and reply drafting
 - Opportunity Detail: original post, lead temperature, suggested next action,
   best responder routing, admin-risk warnings, competitor intelligence, AI

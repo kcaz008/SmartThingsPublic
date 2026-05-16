@@ -60,6 +60,8 @@ const { data: business, error: businessError } = await supabase
       "Calm, practical, Long Island local, and helpful without sounding like an ad.",
     phrases_to_avoid:
       "Best in town, cheapest, guaranteed today, call now, we beat any price.",
+    cta_phone_rule: "no_cta_if_promo_sensitive",
+    tracking_phone: SEED_BUSINESS_PHONE,
   })
   .select("id")
   .single();
@@ -112,6 +114,12 @@ await supabase.from("sources").insert([
     type: "facebook_group",
     town: "Garden City",
     active: true,
+    promo_sensitivity: "high",
+    admin_strictness: "medium",
+    best_reply_style: "personal",
+    phone_safe_in_public: false,
+    dm_first_preferred: true,
+    second_responder_works: true,
   },
   {
     business_id: business.id,
@@ -119,6 +127,12 @@ await supabase.from("sources").insert([
     type: "manual",
     town: "Long Island",
     active: true,
+    promo_sensitivity: "low",
+    admin_strictness: "low",
+    best_reply_style: "company",
+    phone_safe_in_public: true,
+    dm_first_preferred: false,
+    second_responder_works: false,
   },
 ]);
 
@@ -130,6 +144,9 @@ await supabase.from("connected_accounts").insert({
   display_name: SEED_USER_FULL_NAME,
   status: "not_connected",
   connected_groups: ["Garden City Moms & Neighbors"],
+  allowed_business_ids: [business.id],
+  allowed_groups: ["Garden City Moms & Neighbors"],
+  reply_style: "both",
   scopes: ["pages_read_engagement"],
   notes:
     "Seed placeholder only. Use official Meta OAuth/API before connecting.",

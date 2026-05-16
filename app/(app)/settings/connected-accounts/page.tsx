@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { requireAuthContext } from "@/lib/auth";
 import {
   listConnectedAccounts,
+  listBusinesses,
   listFacebookManualPosts,
   listFacebookReplyHistory,
   listTeamMembers,
@@ -40,8 +41,9 @@ const statusLabels = {
 
 export default async function ConnectedAccountsPage() {
   const authContext = await requireAuthContext();
-  const [accounts, teamMembers, manualPosts, replyHistory] = await Promise.all([
+  const [accounts, businesses, teamMembers, manualPosts, replyHistory] = await Promise.all([
     listConnectedAccounts(authContext.businessId),
+    listBusinesses(),
     listTeamMembers(authContext.businessId),
     listFacebookManualPosts(authContext.businessId),
     listFacebookReplyHistory(authContext.businessId),
@@ -218,6 +220,28 @@ export default async function ConnectedAccountsPage() {
                               ? account.connectedGroups.join(", ")
                               : "None yet"}
                           </dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold text-slate-900">
+                            Allowed clients
+                          </dt>
+                          <dd>
+                            {account.allowedBusinessIds.length
+                              ? account.allowedBusinessIds
+                                  .map(
+                                    (id) =>
+                                      businesses.find((business) => business.id === id)
+                                        ?.name ?? id,
+                                  )
+                                  .join(", ")
+                              : "All assigned clients"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold text-slate-900">
+                            Reply style
+                          </dt>
+                          <dd className="capitalize">{account.replyStyle}</dd>
                         </div>
                       </dl>
                       <p className="mt-4 rounded-2xl bg-white p-4 text-sm leading-6 text-slate-600">
@@ -409,6 +433,35 @@ export default async function ConnectedAccountsPage() {
                   className={inputClassName}
                   placeholder="One group or page per line"
                 />
+              </Field>
+              <Field label="Allowed clients/brands">
+                <select
+                  name="allowedBusinessIds"
+                  multiple
+                  className={inputClassName}
+                  defaultValue={[authContext.businessId ?? ""]}
+                >
+                  {businesses.map((business) => (
+                    <option key={business.id} value={business.id}>
+                      {business.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Allowed groups/pages">
+                <textarea
+                  name="allowedGroups"
+                  rows={3}
+                  className={inputClassName}
+                  placeholder="Groups/pages this account may reply in"
+                />
+              </Field>
+              <Field label="Reply style">
+                <select name="replyStyle" className={inputClassName}>
+                  <option value="company">Company</option>
+                  <option value="personal">Personal</option>
+                  <option value="both">Both</option>
+                </select>
               </Field>
               <Field label="Notes">
                 <textarea

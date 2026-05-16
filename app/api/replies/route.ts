@@ -116,6 +116,8 @@ export async function POST(request: Request) {
       serviceType: analysis.service_type,
       urgency: analysis.urgency,
       town: analysis.detected_town,
+      ctaPhoneRule: currentBusiness.ctaPhoneRule,
+      phoneSafeInPublic: source?.phoneSafeInPublic,
     }),
     autoPosted: false,
   });

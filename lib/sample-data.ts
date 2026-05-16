@@ -30,7 +30,32 @@ export const currentBusiness: Business = {
     "Calm, practical, local, and plainspoken. Mention one useful diagnostic clue.",
   phrasesToAvoid:
     "Best in town, cheapest, call now, guaranteed today, we beat any price.",
+  ctaPhoneRule: "no_cta_if_promo_sensitive",
+  trackingPhone: "(516) 777-0242",
 };
+
+export const businesses: Business[] = [
+  currentBusiness,
+  {
+    id: "biz_harbor_home_services",
+    name: "Harbor Home Services",
+    serviceArea: "North Shore Nassau and western Suffolk",
+    toneRules: "Helpful, tidy, premium home-service tone.",
+    phone: "(516) 555-0134",
+    website: "https://harborhomeservices.example",
+    autopilotMode: "draft_only",
+    servicesOffered:
+      "HVAC maintenance, indoor air quality, smart thermostat setup, and home comfort consultations.",
+    emergencyAvailability: "Business-hours dispatch with emergency callbacks.",
+    brandsServiced: "Most residential HVAC brands.",
+    financingOptions: "Ask office for financing availability.",
+    warrantyNotes: "Warranty varies by service.",
+    preferredTone: "Helpful and concise.",
+    phrasesToAvoid: "Cheap, guaranteed, emergency promise.",
+    ctaPhoneRule: "dm_only",
+    trackingPhone: "(516) 555-0134",
+  },
+];
 
 export const currentUser: User = {
   id: "user_avery",
@@ -86,6 +111,12 @@ export const sources: Source[] = [
     url: "https://facebook.com/groups/garden-city-neighbors",
     town: "Garden City",
     active: true,
+    promoSensitivity: "high",
+    adminStrictness: "medium",
+    bestReplyStyle: "personal",
+    phoneSafeInPublic: false,
+    dmFirstPreferred: true,
+    secondResponderWorks: true,
   },
   {
     id: "src_massapequa_fb",
@@ -94,6 +125,12 @@ export const sources: Source[] = [
     type: "facebook_group",
     town: "Massapequa",
     active: true,
+    promoSensitivity: "high",
+    adminStrictness: "high",
+    bestReplyStyle: "personal",
+    phoneSafeInPublic: false,
+    dmFirstPreferred: true,
+    secondResponderWorks: true,
   },
   {
     id: "src_manual",
@@ -102,6 +139,12 @@ export const sources: Source[] = [
     type: "manual",
     town: "Long Island",
     active: true,
+    promoSensitivity: "low",
+    adminStrictness: "low",
+    bestReplyStyle: "company",
+    phoneSafeInPublic: true,
+    dmFirstPreferred: false,
+    secondResponderWorks: false,
   },
   {
     id: "src_huntington_fb",
@@ -110,6 +153,12 @@ export const sources: Source[] = [
     type: "facebook_group",
     town: "Huntington",
     active: true,
+    promoSensitivity: "medium",
+    adminStrictness: "medium",
+    bestReplyStyle: "both",
+    phoneSafeInPublic: true,
+    dmFirstPreferred: false,
+    secondResponderWorks: true,
   },
 ];
 
@@ -245,6 +294,18 @@ export const competitorMentions: CompetitorMention[] = [
     mentionedBeforeUs: true,
     higherPriority: true,
     createdAt: "2026-05-15T22:20:00Z",
+  },
+  {
+    id: "comp_cool_breeze_after",
+    businessId: currentBusiness.id,
+    opportunityId: "opp_ac_not_cooling",
+    sourceId: "src_garden_city_fb",
+    competitorName: "Cool Breeze",
+    town: "Garden City",
+    mentionCount: 1,
+    mentionedBeforeUs: false,
+    higherPriority: true,
+    createdAt: "2026-05-16T04:25:00Z",
   },
 ];
 

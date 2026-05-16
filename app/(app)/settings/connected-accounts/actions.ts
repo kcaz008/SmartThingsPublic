@@ -101,6 +101,12 @@ export async function addConnectedAccountAction(formData: FormData) {
   ).trim();
   const displayName = String(formData.get("displayName") ?? "").trim();
   const connectedGroups = parseList(String(formData.get("connectedGroups") ?? ""));
+  const allowedBusinessIds = formData
+    .getAll("allowedBusinessIds")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+  const allowedGroups = parseList(String(formData.get("allowedGroups") ?? ""));
+  const replyStyle = String(formData.get("replyStyle") ?? "both");
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!displayName) {
@@ -116,9 +122,14 @@ export async function addConnectedAccountAction(formData: FormData) {
       platform: safePlatform,
       provider: safePlatform === "facebook" ? "facebook_group" : safePlatform,
       external_account_id: externalAccountId || null,
+      allowed_business_ids: allowedBusinessIds,
       display_name: displayName,
       status: supportedStatuses.has(status) ? status : "not_connected",
       connected_groups: connectedGroups,
+      allowed_groups: allowedGroups,
+      reply_style: ["company", "personal", "both"].includes(replyStyle)
+        ? replyStyle
+        : "both",
       scopes: safePlatform === "facebook" ? ["pages_read_engagement"] : [],
       connected_at: status === "connected" ? new Date().toISOString() : null,
       notes: notes || null,

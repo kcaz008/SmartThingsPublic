@@ -134,6 +134,55 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <CoordinationCard
+          title="Leads needing second responder"
+          value={String(analytics.secondResponderNeeded)}
+          helper="A teammate should follow after the first public reply."
+        />
+        <CoordinationCard
+          title="Team collisions"
+          value={String(analytics.teamCollisions)}
+          helper="Recent replies, assignments, or closed-lead conflicts."
+        />
+        <CoordinationCard
+          title="Wrong-brand risk"
+          value={String(analytics.wrongBrandRisk)}
+          helper="Leads that may not match the active client brand."
+        />
+        <CoordinationCard
+          title="DM recommended"
+          value={String(analytics.dmRecommended)}
+          helper="Groups or threads where public replies are risky."
+        />
+        <CoordinationCard
+          title="Hot leads with no owner"
+          value={String(analytics.hotUnassigned)}
+          helper="Hot opportunities that still need assignment."
+        />
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+            Follow-ups by employee
+          </p>
+          <div className="mt-4 space-y-3">
+            {analytics.followUpsByEmployee.length ? (
+              analytics.followUpsByEmployee.map((item) => (
+                <div key={item.label} className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">
+                    {item.label}
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                    {item.count}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">No follow-ups queued.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
       <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_22rem]">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -207,6 +256,26 @@ export default async function DashboardPage() {
         </aside>
       </section>
     </>
+  );
+}
+
+function CoordinationCard({
+  title,
+  value,
+  helper,
+}: {
+  title: string;
+  value: string;
+  helper: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+      <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+        {title}
+      </p>
+      <p className="mt-3 text-3xl font-black text-slate-950">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{helper}</p>
+    </div>
   );
 }
 

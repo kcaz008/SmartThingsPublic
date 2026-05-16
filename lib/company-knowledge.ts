@@ -16,6 +16,8 @@ export function formatCompanyKnowledgeForAi(business: Business) {
     business.warrantyNotes ? `Warranty notes: ${business.warrantyNotes}` : "",
     business.preferredTone ? `Preferred tone: ${business.preferredTone}` : "",
     business.phrasesToAvoid ? `Phrases to avoid: ${business.phrasesToAvoid}` : "",
+    `CTA phone rule: ${business.ctaPhoneRule}`,
+    business.trackingPhone ? `Tracking phone: ${business.trackingPhone}` : "",
   ]
     .filter(Boolean)
     .join("\n");

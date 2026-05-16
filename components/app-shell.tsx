@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { formatAutopilotMode } from "@/lib/format";
 import { logoutAction } from "@/lib/auth-actions";
-import { getBusiness } from "@/lib/data";
+import { switchActiveBusinessAction } from "@/lib/client-actions";
+import { getBusiness, listBusinesses } from "@/lib/data";
 import { requireAuthContext } from "@/lib/auth";
 
 const navigation = [
@@ -15,7 +16,10 @@ const navigation = [
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const authContext = await requireAuthContext();
-  const currentBusiness = await getBusiness(authContext.businessId);
+  const [currentBusiness, businesses] = await Promise.all([
+    getBusiness(authContext.businessId),
+    listBusinesses(),
+  ]);
 
   return (
     <div className="min-h-screen lg:flex">
@@ -61,6 +65,28 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
                 Autopilot:{" "}
                 {formatAutopilotMode(currentBusiness.autopilotMode)}
               </div>
+              <form action={switchActiveBusinessAction} className="mt-4">
+                <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-300">
+                  Active client
+                </label>
+                <select
+                  name="businessId"
+                  defaultValue={currentBusiness.id}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white px-3 py-2 text-sm font-bold text-signal-navy"
+                >
+                  {businesses.map((business) => (
+                    <option key={business.id} value={business.id}>
+                      {business.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  className="mt-2 w-full rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20"
+                >
+                  Switch client
+                </button>
+              </form>
               <div className="mt-4 border-t border-white/10 pt-4">
                 <p className="text-sm font-semibold text-white">
                   {authContext.fullName}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import { currentBusiness, currentUser } from "@/lib/sample-data";
+import { cookies } from "next/headers";
+import { businesses, currentBusiness, currentUser } from "@/lib/sample-data";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type AppRole = "owner" | "admin" | "dispatcher" | "technician";
@@ -49,10 +50,16 @@ export function isDemoAuthEnabled() {
   );
 }
 
-function getDemoAuthContext(): AuthContext | null {
+async function getDemoAuthContext(): Promise<AuthContext | null> {
   if (!isDemoAuthEnabled()) {
     return null;
   }
+
+  const cookieStore = await cookies();
+  const requestedBusinessId = cookieStore.get("localsignal_active_business_id")?.value;
+  const activeBusinessId =
+    businesses.find((business) => business.id === requestedBusinessId)?.id ??
+    currentBusiness.id;
 
   return {
     user: {
@@ -60,7 +67,7 @@ function getDemoAuthContext(): AuthContext | null {
       aud: "authenticated",
       email: currentUser.email,
       app_metadata: {
-        business_id: currentBusiness.id,
+        business_id: activeBusinessId,
         role: currentUser.role,
       },
       user_metadata: {
@@ -68,7 +75,7 @@ function getDemoAuthContext(): AuthContext | null {
       },
       created_at: new Date().toISOString(),
     } as User,
-    businessId: currentBusiness.id,
+    businessId: activeBusinessId,
     role: currentUser.role,
     fullName: currentUser.fullName,
   };

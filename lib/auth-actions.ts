@@ -68,6 +68,8 @@ export async function signupAction(formData: FormData) {
       emergency_availability: "Same-day emergency help when schedules allow.",
       preferred_tone: "Helpful, practical, local, and not salesy.",
       phrases_to_avoid: "Best in town, cheapest, guaranteed today, call now.",
+      cta_phone_rule: "no_cta_if_promo_sensitive",
+      tracking_phone: phone || null,
     })
     .select("id")
     .single();

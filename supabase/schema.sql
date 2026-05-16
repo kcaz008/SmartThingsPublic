@@ -56,6 +56,17 @@ create table public.businesses (
   warranty_notes text not null default '',
   preferred_tone text not null default '',
   phrases_to_avoid text not null default '',
+  cta_phone_rule text not null default 'usually_include_phone'
+    check (cta_phone_rule in (
+      'always_include_phone',
+      'usually_include_phone',
+      'dm_only',
+      'never_first_public',
+      'tracking_number',
+      'employee_phone',
+      'no_cta_if_promo_sensitive'
+    )),
+  tracking_phone text,
   created_at timestamptz not null default now()
 );
 
@@ -81,7 +92,16 @@ create table public.sources (
   type public.source_type not null default 'manual',
   url text,
   town text,
-  active boolean not null default true
+  active boolean not null default true,
+  promo_sensitivity text not null default 'medium'
+    check (promo_sensitivity in ('low', 'medium', 'high')),
+  admin_strictness text not null default 'medium'
+    check (admin_strictness in ('low', 'medium', 'high')),
+  best_reply_style text not null default 'both'
+    check (best_reply_style in ('company', 'personal', 'both')),
+  phone_safe_in_public boolean not null default true,
+  dm_first_preferred boolean not null default false,
+  second_responder_works boolean not null default true
 );
 
 create table public.opportunities (
@@ -127,6 +147,7 @@ create table public.connected_accounts (
     check (platform in ('facebook', 'nextdoor', 'reddit', 'manual', 'other')),
   provider public.source_type not null default 'facebook_group',
   external_account_id text,
+  allowed_business_ids uuid[] not null default '{}'::uuid[],
   display_name text not null,
   status public.connected_account_status not null default 'pending_oauth',
   access_token_placeholder text,
@@ -134,6 +155,9 @@ create table public.connected_accounts (
   token_expires_at timestamptz,
   scopes text[] not null default '{}'::text[],
   connected_groups text[] not null default '{}'::text[],
+  allowed_groups text[] not null default '{}'::text[],
+  reply_style text not null default 'both'
+    check (reply_style in ('company', 'personal', 'both')),
   notes text,
   connected_at timestamptz,
   last_sync_at timestamptz,

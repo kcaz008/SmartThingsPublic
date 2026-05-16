@@ -179,6 +179,34 @@ export default async function SettingsPage() {
                   />
                 </Field>
               </div>
+              <Field label="CTA / phone-number rule">
+                <select
+                  name="ctaPhoneRule"
+                  disabled={!canEdit}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.ctaPhoneRule}
+                >
+                  <option value="always_include_phone">Always include phone</option>
+                  <option value="usually_include_phone">Usually include phone</option>
+                  <option value="dm_only">Only include phone in DM</option>
+                  <option value="never_first_public">
+                    Never on first public reply
+                  </option>
+                  <option value="tracking_number">Use tracking number</option>
+                  <option value="employee_phone">Use employee phone</option>
+                  <option value="no_cta_if_promo_sensitive">
+                    No CTA if promo-sensitive
+                  </option>
+                </select>
+              </Field>
+              <Field label="Tracking / preferred phone">
+                <input
+                  name="trackingPhone"
+                  disabled={!canEdit}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.trackingPhone ?? ""}
+                />
+              </Field>
             </div>
           </section>
 

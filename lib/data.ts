@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/lib/supabase";
 import { recommendedKeywords } from "@/lib/default-keywords";
 import {
   aiReplies as sampleReplies,
+  businesses as sampleBusinesses,
   competitorMentions as sampleCompetitorMentions,
   currentBusiness as sampleBusiness,
   opportunities as sampleOpportunities,
@@ -38,6 +39,8 @@ type BusinessRow = {
   warranty_notes: string | null;
   preferred_tone: string | null;
   phrases_to_avoid: string | null;
+  cta_phone_rule: Business["ctaPhoneRule"] | null;
+  tracking_phone: string | null;
 };
 
 type SourceRow = {
@@ -48,6 +51,12 @@ type SourceRow = {
   url: string | null;
   town: string | null;
   active: boolean;
+  promo_sensitivity: Source["promoSensitivity"] | null;
+  admin_strictness: Source["adminStrictness"] | null;
+  best_reply_style: Source["bestReplyStyle"] | null;
+  phone_safe_in_public: boolean | null;
+  dm_first_preferred: boolean | null;
+  second_responder_works: boolean | null;
 };
 
 type OpportunityRow = {
@@ -91,9 +100,12 @@ type ConnectedAccountRow = {
   platform: ConnectedAccount["platform"];
   provider: Source["type"] | null;
   external_account_id: string | null;
+  allowed_business_ids: string[] | null;
   display_name: string;
   status: ConnectedAccount["status"];
   connected_groups: string[] | null;
+  allowed_groups: string[] | null;
+  reply_style: ConnectedAccount["replyStyle"] | null;
   scopes: string[] | null;
   notes: string | null;
   created_at: string;
@@ -183,12 +195,15 @@ export async function getBusiness(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleBusiness;
+    return (
+      sampleBusinesses.find((business) => business.id === businessId) ??
+      sampleBusiness
+    );
   }
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
     .eq("id", businessId)
     .single<BusinessRow>();
 
@@ -199,16 +214,36 @@ export async function getBusiness(businessId: string | null) {
   return mapBusiness(data);
 }
 
+export async function listBusinesses() {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    return sampleBusinesses;
+  }
+
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
+    .order("name")
+    .returns<BusinessRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapBusiness);
+}
+
 export async function listSources(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleSources;
+    return sampleSources.filter((source) => source.businessId === businessId);
   }
 
   const { data, error } = await supabase
     .from("sources")
-    .select("id,business_id,name,type,url,town,active")
+    .select("id,business_id,name,type,url,town,active,promo_sensitivity,admin_strictness,best_reply_style,phone_safe_in_public,dm_first_preferred,second_responder_works")
     .eq("business_id", businessId)
     .order("active", { ascending: false })
     .order("name")
@@ -225,7 +260,9 @@ export async function listOpportunities(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleOpportunities;
+    return sampleOpportunities.filter(
+      (opportunity) => opportunity.businessId === businessId,
+    );
   }
 
   const { data, error } = await supabase
@@ -252,7 +289,8 @@ export async function getOpportunity(
 
   if (!supabase || !businessId) {
     return sampleOpportunities.find(
-      (opportunity) => opportunity.id === opportunityId,
+      (opportunity) =>
+        opportunity.id === opportunityId && opportunity.businessId === businessId,
     );
   }
 
@@ -303,7 +341,9 @@ export async function getSource(businessId: string | null, sourceId: string) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleSources.find((source) => source.id === sourceId);
+    return sampleSources.find(
+      (source) => source.id === sourceId && source.businessId === businessId,
+    );
   }
 
   const { data, error } = await supabase
@@ -356,7 +396,7 @@ export async function listConnectedAccounts(businessId: string | null) {
   const { data, error } = await supabase
     .from("connected_accounts")
     .select(
-      "id,business_id,team_member_id,platform,provider,external_account_id,display_name,status,connected_groups,scopes,notes,created_at,connected_at,last_sync_at",
+      "id,business_id,team_member_id,platform,provider,external_account_id,allowed_business_ids,display_name,status,connected_groups,allowed_groups,reply_style,scopes,notes,created_at,connected_at,last_sync_at",
     )
     .eq("business_id", businessId)
     .order("created_at", { ascending: false })
@@ -373,7 +413,7 @@ export async function listTeamMembers(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleTeamMembers;
+    return sampleTeamMembers.filter((member) => member.businessId === businessId);
   }
 
   const { data, error } = await supabase
@@ -494,7 +534,9 @@ export async function listCompetitorMentions(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return sampleCompetitorMentions;
+    return sampleCompetitorMentions.filter(
+      (mention) => mention.businessId === businessId,
+    );
   }
 
   const { data, error } = await supabase
@@ -545,6 +587,8 @@ function mapBusiness(row: BusinessRow): Business {
     warrantyNotes: row.warranty_notes ?? "",
     preferredTone: row.preferred_tone ?? "",
     phrasesToAvoid: row.phrases_to_avoid ?? "",
+    ctaPhoneRule: row.cta_phone_rule ?? "usually_include_phone",
+    trackingPhone: row.tracking_phone ?? undefined,
   };
 }
 
@@ -557,6 +601,12 @@ function mapSource(row: SourceRow): Source {
     url: row.url ?? undefined,
     town: row.town ?? "All service areas",
     active: row.active,
+    promoSensitivity: row.promo_sensitivity ?? "medium",
+    adminStrictness: row.admin_strictness ?? "medium",
+    bestReplyStyle: row.best_reply_style ?? "both",
+    phoneSafeInPublic: row.phone_safe_in_public ?? true,
+    dmFirstPreferred: row.dm_first_preferred ?? false,
+    secondResponderWorks: row.second_responder_works ?? true,
   };
 }
 
@@ -609,7 +659,10 @@ function mapConnectedAccount(row: ConnectedAccountRow): ConnectedAccount {
     displayName: row.display_name,
     status: row.status,
     externalAccountId: row.external_account_id ?? undefined,
+    allowedBusinessIds: row.allowed_business_ids ?? [],
     connectedGroups: row.connected_groups ?? [],
+    allowedGroups: row.allowed_groups ?? [],
+    replyStyle: row.reply_style ?? "both",
     scopes: row.scopes ?? [],
     notes: row.notes ?? undefined,
     createdAt: row.created_at,

@@ -192,6 +192,7 @@ export async function POST(request: Request) {
       serviceType: aiAnalysis.service_type,
       urgency: aiAnalysis.urgency,
       town: aiAnalysis.detected_town,
+      ctaPhoneRule: currentBusiness.ctaPhoneRule,
     }),
     autopilotMode: currentBusiness.autopilotMode,
     autoPosted,

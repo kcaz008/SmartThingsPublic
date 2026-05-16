@@ -12,6 +12,15 @@ const autopilotModes = new Set<AutopilotMode>([
   "approval_required",
   "post_when_connected",
 ]);
+const ctaPhoneRules = new Set([
+  "always_include_phone",
+  "usually_include_phone",
+  "dm_only",
+  "never_first_public",
+  "tracking_number",
+  "employee_phone",
+  "no_cta_if_promo_sensitive",
+]);
 
 export async function updateBusinessSettingsAction(formData: FormData) {
   const authContext = await requireAuthContext();
@@ -24,6 +33,9 @@ export async function updateBusinessSettingsAction(formData: FormData) {
   const autopilotMode = String(
     formData.get("autopilotMode") ?? "off",
   ) as AutopilotMode;
+  const ctaPhoneRule = String(
+    formData.get("ctaPhoneRule") ?? "usually_include_phone",
+  );
 
   const payload = {
     name: String(formData.get("name") ?? "").trim(),
@@ -41,6 +53,10 @@ export async function updateBusinessSettingsAction(formData: FormData) {
     warranty_notes: String(formData.get("warrantyNotes") ?? "").trim(),
     preferred_tone: String(formData.get("preferredTone") ?? "").trim(),
     phrases_to_avoid: String(formData.get("phrasesToAvoid") ?? "").trim(),
+    cta_phone_rule: ctaPhoneRules.has(ctaPhoneRule)
+      ? ctaPhoneRule
+      : "usually_include_phone",
+    tracking_phone: String(formData.get("trackingPhone") ?? "").trim(),
   };
 
   if (!payload.name || !payload.service_area || !payload.tone_rules) {

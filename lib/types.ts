@@ -34,6 +34,16 @@ export type ReputationMemoryType =
   | "reply_converts"
   | "employee_closes"
   | "group_dislikes_promo";
+export type CtaPhoneRule =
+  | "always_include_phone"
+  | "usually_include_phone"
+  | "dm_only"
+  | "never_first_public"
+  | "tracking_number"
+  | "employee_phone"
+  | "no_cta_if_promo_sensitive";
+export type GroupSensitivity = "low" | "medium" | "high";
+export type ReplyStyle = "company" | "personal" | "both";
 export type IntentType =
   | "recommendation_request"
   | "urgent_repair"
@@ -66,6 +76,8 @@ export type Business = {
   warrantyNotes: string;
   preferredTone: string;
   phrasesToAvoid: string;
+  ctaPhoneRule: CtaPhoneRule;
+  trackingPhone?: string;
 };
 
 export type TargetKeyword = {
@@ -101,7 +113,10 @@ export type ConnectedAccount = {
     | "needs_reauth"
     | "error";
   externalAccountId?: string;
+  allowedBusinessIds: string[];
   connectedGroups: string[];
+  allowedGroups: string[];
+  replyStyle: ReplyStyle;
   scopes: string[];
   notes?: string;
   createdAt: string;
@@ -182,6 +197,12 @@ export type Source = {
   url?: string;
   town: string;
   active: boolean;
+  promoSensitivity: GroupSensitivity;
+  adminStrictness: GroupSensitivity;
+  bestReplyStyle: ReplyStyle;
+  phoneSafeInPublic: boolean;
+  dmFirstPreferred: boolean;
+  secondResponderWorks: boolean;
 };
 
 export type AiAnalysis = {

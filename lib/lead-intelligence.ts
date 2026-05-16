@@ -17,6 +17,13 @@ export type SuggestedNextAction =
   | "Already handled"
   | "Assign to team member"
   | "Avoid replying";
+export type CoordinationLabel =
+  | "Safe to reply"
+  | "Wait"
+  | "DM only"
+  | "Already handled"
+  | "Second responder recommended"
+  | "Avoid replying";
 
 export type LeadIntelligence = {
   temperature: LeadTemperature;
@@ -28,6 +35,12 @@ export type LeadIntelligence = {
   bestResponder: string;
   adminRiskWarnings: string[];
   embarrassmentWarnings: string[];
+  collisionWarnings: string[];
+  safetyLabel: CoordinationLabel;
+  secondResponderRecommended: boolean;
+  firstResponder: string;
+  recommendedSecondResponder: string;
+  secondResponderReason: string;
   competitorInsights: string[];
 };
 
@@ -39,6 +52,12 @@ export type LeadAnalytics = {
   bookedClosedCount: number;
   competitorMentions: number;
   followUpsNeeded: number;
+  secondResponderNeeded: number;
+  teamCollisions: number;
+  wrongBrandRisk: number;
+  dmRecommended: number;
+  hotUnassigned: number;
+  followUpsByEmployee: Array<{ label: string; count: number }>;
 };
 
 const hostilePattern =
@@ -81,6 +100,8 @@ export function deriveLeadIntelligence({
       (memory.sourceId === opportunity.sourceId ||
         memory.subject.toLowerCase().includes(source?.name.toLowerCase() ?? "")),
   );
+  const phoneUnsafe = source && !source.phoneSafeInPublic;
+  const dmPreferred = source?.dmFirstPreferred || source?.promoSensitivity === "high";
   const emergency =
     opportunity.urgency === "high" ||
     /no heat|no ac|no a\/c|not cooling|not heating|burning|leak|carbon monoxide|sparking|emergency|today|tonight|asap/i.test(
@@ -114,7 +135,32 @@ export function deriveLeadIntelligence({
     promoSensitiveMemory
       ? `${source?.name ?? "This group"} has memory warning against promotional comments.`
       : "",
+    phoneUnsafe ? "Phone number is not safe in public comments for this group." : "",
+    dmPreferred ? "This group is better handled DM-first." : "",
   ].filter(Boolean);
+  const firstResponder =
+    reply?.copied || ["approved", "replied", "booked", "won"].includes(opportunity.status)
+      ? teamMembers[0]?.fullName ?? "A team member"
+      : "None yet";
+  const recommendedSecondResponder =
+    teamMembers.find((member) => member.fullName !== firstResponder && member.role === "dispatcher")
+      ?.fullName ??
+    teamMembers.find((member) => member.fullName !== firstResponder)?.fullName ??
+    "Assign second responder";
+  const competitorAfterUs = relevantCompetitors.some(
+    (mention) => !mention.mentionedBeforeUs,
+  );
+  const secondResponderRecommended =
+    firstResponder !== "None yet" &&
+    source?.secondResponderWorks !== false &&
+    (competitorAfterUs ||
+      opportunity.status === "approved" ||
+      /follow up|any update|still need|did you/i.test(text));
+  const secondResponderReason = secondResponderRecommended
+    ? competitorAfterUs
+      ? "A competitor commented after us while the thread is still active."
+      : "The first reply may need a more personal follow-up."
+    : "No second responder needed yet.";
   const embarrassmentWarnings = [
     reply?.copied || opportunity.status === "replied"
       ? "Our team appears to have already replied."
@@ -128,6 +174,18 @@ export function deriveLeadIntelligence({
       : "",
     textLower.includes("516-777-0242") || textLower.includes("(516) 777-0242")
       ? "Phone number was already posted recently."
+      : "",
+    source?.bestReplyStyle === "personal"
+      ? "A personal/team-member reply may feel safer than another company reply."
+      : "",
+  ].filter(Boolean);
+  const collisionWarnings = [
+    firstResponder !== "None yet" ? `${firstResponder} already replied or copied a draft.` : "",
+    ["booked", "won", "lost"].includes(opportunity.status)
+      ? "Lead is already booked or closed."
+      : "",
+    /no more company comments|please no more|stop commenting/i.test(text)
+      ? "Customer asked not to receive more company comments."
       : "",
   ].filter(Boolean);
   const bestResponder = chooseBestResponder({
@@ -164,6 +222,19 @@ export function deriveLeadIntelligence({
     bestResponder,
     adminRiskWarnings,
     embarrassmentWarnings,
+    collisionWarnings,
+    safetyLabel: chooseSafetyLabel({
+      opportunity,
+      secondResponderRecommended,
+      adminRiskWarnings,
+      embarrassmentWarnings,
+      collisionWarnings,
+      dmPreferred,
+    }),
+    secondResponderRecommended,
+    firstResponder,
+    recommendedSecondResponder,
+    secondResponderReason,
     competitorInsights: relevantCompetitors.map((mention) => {
       const timing = mention.mentionedBeforeUs ? "before us" : "after us";
       const priority = mention.higherPriority ? "raises priority" : "monitor";
@@ -219,6 +290,38 @@ export function buildLeadAnalytics({
       (opportunity) =>
         intelligenceById.get(opportunity.id)?.suggestedNextAction === "Follow up",
     ).length,
+    secondResponderNeeded: opportunities.filter(
+      (opportunity) =>
+        intelligenceById.get(opportunity.id)?.secondResponderRecommended,
+    ).length,
+    teamCollisions: opportunities.filter(
+      (opportunity) =>
+        (intelligenceById.get(opportunity.id)?.collisionWarnings.length ?? 0) > 0,
+    ).length,
+    wrongBrandRisk: 0,
+    dmRecommended: opportunities.filter(
+      (opportunity) =>
+        intelligenceById.get(opportunity.id)?.safetyLabel === "DM only",
+    ).length,
+    hotUnassigned: opportunities.filter((opportunity) => {
+      const intelligence = intelligenceById.get(opportunity.id);
+      return (
+        intelligence?.temperature === "Hot" &&
+        intelligence.bestResponder === "Assign to team member"
+      );
+    }).length,
+    followUpsByEmployee: topCounts(
+      opportunities
+        .filter(
+          (opportunity) =>
+            intelligenceById.get(opportunity.id)?.suggestedNextAction ===
+            "Follow up",
+        )
+        .map(
+          (opportunity) =>
+            intelligenceById.get(opportunity.id)?.bestResponder ?? "Unassigned",
+        ),
+    ),
   };
 }
 
@@ -296,6 +399,9 @@ function chooseNextAction({
   }
 
   if (embarrassmentWarnings.length) {
+    if (temperature === "Hot" && bestResponder !== "Assign to team member") {
+      return "DM instead";
+    }
     return "Avoid replying";
   }
 
@@ -316,6 +422,44 @@ function chooseNextAction({
   }
 
   return temperature === "Warm" ? "Follow up" : "Wait";
+}
+
+function chooseSafetyLabel({
+  opportunity,
+  secondResponderRecommended,
+  adminRiskWarnings,
+  embarrassmentWarnings,
+  collisionWarnings,
+  dmPreferred,
+}: {
+  opportunity: Opportunity;
+  secondResponderRecommended: boolean;
+  adminRiskWarnings: string[];
+  embarrassmentWarnings: string[];
+  collisionWarnings: string[];
+  dmPreferred?: boolean;
+}): CoordinationLabel {
+  if (["booked", "won", "lost", "ignored"].includes(opportunity.status)) {
+    return "Already handled";
+  }
+
+  if (secondResponderRecommended) {
+    return "Second responder recommended";
+  }
+
+  if (embarrassmentWarnings.length || collisionWarnings.length) {
+    return "Avoid replying";
+  }
+
+  if (dmPreferred || adminRiskWarnings.length) {
+    return "DM only";
+  }
+
+  if (opportunity.urgency === "low") {
+    return "Wait";
+  }
+
+  return "Safe to reply";
 }
 
 function topCounts(values: string[]) {

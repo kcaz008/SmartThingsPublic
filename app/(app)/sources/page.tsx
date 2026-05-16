@@ -132,6 +132,32 @@ export default async function SourcesPage() {
                     </a>
                   ) : null}
                 </div>
+                <div className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600 md:grid-cols-2">
+                  <div>
+                    <p className="font-bold text-slate-900">Promo sensitivity</p>
+                    <p className="capitalize">{source.promoSensitivity}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">Admin strictness</p>
+                    <p className="capitalize">{source.adminStrictness}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">Best reply style</p>
+                    <p className="capitalize">{source.bestReplyStyle}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">Phone in public</p>
+                    <p>{source.phoneSafeInPublic ? "Safe" : "Avoid"}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">DM-first</p>
+                    <p>{source.dmFirstPreferred ? "Preferred" : "Optional"}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">Second responder</p>
+                    <p>{source.secondResponderWorks ? "Works here" : "Use rarely"}</p>
+                  </div>
+                </div>
               </article>
             ))}
           </div>
