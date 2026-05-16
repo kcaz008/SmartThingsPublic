@@ -4,8 +4,17 @@ import { CopyReplyButton } from "@/components/copy-reply-button";
 import { PageHeader } from "@/components/page-header";
 import { PlainBadge, StatusBadge, UrgencyBadge } from "@/components/status-badge";
 import { requireAuthContext } from "@/lib/auth";
-import { getOpportunity, getReplyForOpportunity, getSource } from "@/lib/data";
+import {
+  getOpportunity,
+  getReplyForOpportunity,
+  getSource,
+  listCompetitorMentions,
+  listFacebookReplyHistory,
+  listReputationMemories,
+  listTeamMembers,
+} from "@/lib/data";
 import { formatDateTime, summarizeText } from "@/lib/format";
+import { deriveLeadIntelligence } from "@/lib/lead-intelligence";
 import { reviewReplyAction } from "./actions";
 
 export default async function OpportunityDetailPage({
@@ -21,10 +30,30 @@ export default async function OpportunityDetailPage({
     notFound();
   }
 
-  const [reply, source] = await Promise.all([
+  const [
+    reply,
+    source,
+    teamMembers,
+    replyHistory,
+    reputationMemories,
+    competitorMentions,
+  ] = await Promise.all([
     getReplyForOpportunity(authContext.businessId, opportunity.id),
     getSource(authContext.businessId, opportunity.sourceId),
+    listTeamMembers(authContext.businessId),
+    listFacebookReplyHistory(authContext.businessId),
+    listReputationMemories(authContext.businessId),
+    listCompetitorMentions(authContext.businessId),
   ]);
+  const intelligence = deriveLeadIntelligence({
+    opportunity,
+    source,
+    teamMembers,
+    reply,
+    replyHistory,
+    reputationMemories,
+    competitorMentions,
+  });
 
   return (
     <>
@@ -49,7 +78,22 @@ export default async function OpportunityDetailPage({
               <StatusBadge status={opportunity.status} />
               <UrgencyBadge urgency={opportunity.urgency} />
               <PlainBadge>{opportunity.leadScore} lead score</PlainBadge>
+              <PlainBadge>{intelligence.temperature} lead</PlainBadge>
               <PlainBadge>{opportunity.serviceType}</PlainBadge>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <IntelligenceMetric
+                label="Recommended action"
+                value={intelligence.suggestedNextAction}
+              />
+              <IntelligenceMetric
+                label="Best responder"
+                value={intelligence.bestResponder}
+              />
+              <IntelligenceMetric
+                label="Response speed"
+                value={intelligence.recommendedResponseSpeed}
+              />
             </div>
             <div className="mt-6 rounded-3xl bg-slate-50 p-5">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
@@ -157,9 +201,22 @@ export default async function OpportunityDetailPage({
         <aside className="space-y-6">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
-              AI analysis
+              Lead temperature
             </p>
             <div className="mt-4 space-y-4">
+              <AnalysisRow label="Temperature" value={intelligence.temperature} />
+              <AnalysisRow
+                label="Likelihood"
+                value={`${intelligence.likelihoodToConvert}%`}
+              />
+              <AnalysisRow
+                label="Homeowner/renter"
+                value={intelligence.homeownerRenterGuess}
+              />
+              <AnalysisRow
+                label="Emergency"
+                value={intelligence.emergency ? "Yes" : "No"}
+              />
               <AnalysisRow label="Service type" value={opportunity.serviceType} />
               <AnalysisRow
                 label="Detected town"
@@ -173,6 +230,57 @@ export default async function OpportunityDetailPage({
                 label="Intent type"
                 value={opportunity.intentType.replaceAll("_", " ")}
               />
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Don&apos;t embarrass us
+            </p>
+            <div className="mt-4 space-y-3">
+              {[
+                ...intelligence.adminRiskWarnings,
+                ...intelligence.embarrassmentWarnings,
+              ].length ? (
+                [
+                  ...intelligence.adminRiskWarnings,
+                  ...intelligence.embarrassmentWarnings,
+                ].map((warning) => (
+                  <div
+                    key={warning}
+                    className="rounded-2xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900"
+                  >
+                    {warning}
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+                  No obvious duplicate, hostile-thread, closed-lead, or
+                  repetitive-reply warning.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Competitor intelligence
+            </p>
+            <div className="mt-4 space-y-3">
+              {intelligence.competitorInsights.length ? (
+                intelligence.competitorInsights.map((insight) => (
+                  <div
+                    key={insight}
+                    className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700"
+                  >
+                    {insight}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">
+                  No competitor mentions tracked for this lead yet.
+                </p>
+              )}
             </div>
           </div>
 
@@ -205,6 +313,23 @@ export default async function OpportunityDetailPage({
         </aside>
       </div>
     </>
+  );
+}
+
+function IntelligenceMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-black text-slate-950">{value}</p>
+    </div>
   );
 }
 

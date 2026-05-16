@@ -77,6 +77,7 @@ The schema creates:
 - `facebook_manual_posts`
 - `facebook_reply_history`
 - `reputation_memories`
+- `competitor_mentions`
 - `audit_logs`
 
 The schema includes opportunity statuses, autopilot modes, source types,
@@ -115,10 +116,17 @@ To also verify login for a test user, set `CHECK_USER_EMAIL` and
 ## MVP pages
 
 - Dashboard: command-center metrics, filters, source health, opportunities
+- Lead Analytics: leads by town/group, hot leads this week, response rate,
+  booked/closed count, competitor mentions, follow-ups needed
 - Add Opportunity: manual post intake with AI analysis and reply drafting
-- Opportunity Detail: original post, AI analysis, draft, copy-to-clipboard
+- Opportunity Detail: original post, lead temperature, suggested next action,
+  best responder routing, admin-risk warnings, competitor intelligence, AI
+  draft, copy-to-clipboard
 - Sources: tracked community/source records and target keywords
 - Settings: business profile, tone rules, autopilot mode, audit log
+- Company Knowledge Settings: service areas, services offered, emergency
+  availability, brands serviced, financing, warranty notes, preferred tone, and
+  phrases to avoid
 - Reputation Memory: tone, conversion, employee, and group-promotion learnings
   used as AI drafting guidance
 - Connected Accounts: team profiles, safe Meta OAuth placeholders, Facebook

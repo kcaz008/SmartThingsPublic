@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
+import { formatCompanyKnowledgeForAi } from "@/lib/company-knowledge";
 import { getBusiness, getReputationMemorySummary } from "@/lib/data";
 import {
   createAiAnalysis,
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
     company_phone: String(body.company_phone ?? currentBusiness.phone),
     tone_rules: [
       String(body.tone_rules ?? currentBusiness.toneRules),
+      formatCompanyKnowledgeForAi(currentBusiness),
       reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
     ]
       .filter(Boolean)
@@ -119,6 +121,24 @@ export async function POST(request: Request) {
 
     replyId = reply.id;
 
+    const competitorNames = detectCompetitors(postText);
+    if (competitorNames.length) {
+      await supabase.from("competitor_mentions").insert(
+        competitorNames.map((competitorName) => ({
+          business_id: authContext.businessId,
+          opportunity_id: opportunity.id,
+          source_id: sourceId || null,
+          competitor_name: competitorName,
+          town:
+            String(body.detected_town ?? body.town ?? aiAnalysis.detected_town).trim() ||
+            aiAnalysis.detected_town,
+          mention_count: countMentions(postText, competitorName),
+          mentioned_before_us: true,
+          higher_priority: aiAnalysis.lead_score >= 70,
+        })),
+      );
+    }
+
     await logAuditEvent({
       businessId: authContext.businessId,
       userId: authContext.user.id,
@@ -144,4 +164,27 @@ export async function POST(request: Request) {
     autopilotMode: currentBusiness.autopilotMode,
     autoPosted: false,
   });
+}
+
+function detectCompetitors(text: string) {
+  const knownCompetitors = [
+    "Cool Breeze",
+    "Four Seasons",
+    "Universe",
+    "Petro",
+    "Apple Air",
+    "Gold Star",
+    "T.F. O'Brien",
+  ];
+
+  return knownCompetitors.filter((name) =>
+    text.toLowerCase().includes(name.toLowerCase()),
+  );
+}
+
+function countMentions(text: string, phrase: string) {
+  return text
+    .toLowerCase()
+    .split(phrase.toLowerCase())
+    .length - 1;
 }

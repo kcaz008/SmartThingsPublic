@@ -58,6 +58,13 @@ export type Business = {
   phone: string;
   website: string;
   autopilotMode: AutopilotMode;
+  servicesOffered: string;
+  emergencyAvailability: string;
+  brandsServiced: string;
+  financingOptions: string;
+  warrantyNotes: string;
+  preferredTone: string;
+  phrasesToAvoid: string;
 };
 
 export type TargetKeyword = {
@@ -140,6 +147,19 @@ export type ReputationMemory = {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+export type CompetitorMention = {
+  id: string;
+  businessId: string;
+  opportunityId?: string;
+  sourceId?: string;
+  competitorName: string;
+  town?: string;
+  mentionCount: number;
+  mentionedBeforeUs: boolean;
+  higherPriority: boolean;
+  createdAt: string;
 };
 
 export type AuditLog = {

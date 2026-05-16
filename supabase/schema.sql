@@ -48,6 +48,13 @@ create table public.businesses (
   service_area text not null,
   tone_rules text not null default 'Helpful local pro, clear, specific, and never pushy.',
   autopilot_mode public.autopilot_mode not null default 'off',
+  services_offered text not null default '',
+  emergency_availability text not null default '',
+  brands_serviced text not null default '',
+  financing_options text not null default '',
+  warranty_notes text not null default '',
+  preferred_tone text not null default '',
+  phrases_to_avoid text not null default '',
   created_at timestamptz not null default now()
 );
 
@@ -176,6 +183,19 @@ create table public.reputation_memories (
   updated_at timestamptz not null default now()
 );
 
+create table public.competitor_mentions (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid not null references public.businesses(id) on delete cascade,
+  opportunity_id uuid references public.opportunities(id) on delete set null,
+  source_id uuid references public.sources(id) on delete set null,
+  competitor_name text not null,
+  town text,
+  mention_count integer not null default 1 check (mention_count >= 0),
+  mentioned_before_us boolean not null default true,
+  higher_priority boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 create table public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
@@ -220,6 +240,9 @@ create index facebook_reply_history_business_created_idx
 create index reputation_memories_business_type_idx
   on public.reputation_memories (business_id, memory_type, active, score desc);
 
+create index competitor_mentions_business_name_idx
+  on public.competitor_mentions (business_id, competitor_name, created_at desc);
+
 create index audit_logs_business_created_idx
   on public.audit_logs (business_id, created_at desc);
 
@@ -233,6 +256,7 @@ alter table public.connected_accounts enable row level security;
 alter table public.facebook_manual_posts enable row level security;
 alter table public.facebook_reply_history enable row level security;
 alter table public.reputation_memories enable row level security;
+alter table public.competitor_mentions enable row level security;
 alter table public.audit_logs enable row level security;
 
 create or replace function public.current_business_id()
@@ -308,6 +332,11 @@ create policy "Users can manage Facebook reply history"
 
 create policy "Users can manage reputation memories"
   on public.reputation_memories for all
+  using (business_id = public.current_business_id())
+  with check (business_id = public.current_business_id());
+
+create policy "Users can manage competitor mentions"
+  on public.competitor_mentions for all
   using (business_id = public.current_business_id())
   with check (business_id = public.current_business_id());
 

@@ -4,14 +4,58 @@ import { OpportunityCard } from "@/components/opportunity-card";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
 import { requireAuthContext } from "@/lib/auth";
-import { listOpportunities, listSources } from "@/lib/data";
+import {
+  listCompetitorMentions,
+  listFacebookReplyHistory,
+  listOpportunities,
+  listReputationMemories,
+  listSources,
+  listTeamMembers,
+} from "@/lib/data";
+import {
+  buildLeadAnalytics,
+  deriveLeadIntelligence,
+} from "@/lib/lead-intelligence";
 
 export default async function DashboardPage() {
   const authContext = await requireAuthContext();
-  const [opportunities, sources] = await Promise.all([
+  const [
+    opportunities,
+    sources,
+    teamMembers,
+    replyHistory,
+    reputationMemories,
+    competitorMentions,
+  ] = await Promise.all([
     listOpportunities(authContext.businessId),
     listSources(authContext.businessId),
+    listTeamMembers(authContext.businessId),
+    listFacebookReplyHistory(authContext.businessId),
+    listReputationMemories(authContext.businessId),
+    listCompetitorMentions(authContext.businessId),
   ]);
+  const intelligenceById = new Map(
+    opportunities.map((opportunity) => {
+      const source = sources.find((item) => item.id === opportunity.sourceId);
+      return [
+        opportunity.id,
+        deriveLeadIntelligence({
+          opportunity,
+          source,
+          teamMembers,
+          replyHistory,
+          reputationMemories,
+          competitorMentions,
+        }),
+      ];
+    }),
+  );
+  const analytics = buildLeadAnalytics({
+    opportunities,
+    sources,
+    intelligenceById,
+    competitorMentions,
+  });
   const activeOpportunities = opportunities.filter(
     (opportunity) => !["won", "lost", "ignored"].includes(opportunity.status),
   );
@@ -48,9 +92,9 @@ export default async function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Open signals"
-          value={String(activeOpportunities.length)}
-          helper="New, drafted, approved, replied, and booked opportunities."
+          label="Hot this week"
+          value={String(analytics.hotLeadsThisWeek)}
+          helper="Leads that need fast, careful response."
         />
         <StatCard
           label="Drafts ready"
@@ -59,17 +103,35 @@ export default async function DashboardPage() {
           tone="amber"
         />
         <StatCard
-          label="Booked"
-          value={String(bookedCount)}
-          helper="Manual follow-up led to an appointment."
+          label="Response rate"
+          value={`${analytics.responseRate}%`}
+          helper="Replied, booked, or won out of all tracked leads."
           tone="green"
         />
         <StatCard
-          label="Avg. lead score"
-          value={String(averageLeadScore)}
-          helper="AI lead score across active neighborhood opportunities."
+          label="Follow-ups needed"
+          value={String(analytics.followUpsNeeded)}
+          helper={`Avg score ${averageLeadScore}; ${bookedCount} booked.`}
           tone="blue"
         />
+      </section>
+
+      <section className="mt-6 grid gap-4 lg:grid-cols-3">
+        <AnalyticsCard title="Leads by town" items={analytics.leadsByTown} />
+        <AnalyticsCard title="Leads by group" items={analytics.leadsByGroup} />
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+            Competitive signals
+          </p>
+          <p className="mt-3 text-3xl font-black text-slate-950">
+            {analytics.competitorMentions}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Competitor mentions tracked across local groups. Booked/closed:
+            {" "}
+            {analytics.bookedClosedCount}.
+          </p>
+        </div>
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_22rem]">
@@ -86,6 +148,7 @@ export default async function DashboardPage() {
                 key={opportunity.id}
                 opportunity={opportunity}
                 source={sources.find((source) => source.id === opportunity.sourceId)}
+                intelligence={intelligenceById.get(opportunity.id)}
               />
             ))}
           </div>
@@ -144,5 +207,37 @@ export default async function DashboardPage() {
         </aside>
       </section>
     </>
+  );
+}
+
+function AnalyticsCard({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ label: string; count: number }>;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+      <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+        {title}
+      </p>
+      <div className="mt-4 space-y-3">
+        {items.length ? (
+          items.map((item) => (
+            <div key={item.label} className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700">
+                {item.label}
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                {item.count}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-slate-500">No leads yet.</p>
+        )}
+      </div>
+    </div>
   );
 }

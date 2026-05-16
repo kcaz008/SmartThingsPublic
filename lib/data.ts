@@ -1,15 +1,18 @@
 import { createSupabaseServerClient } from "@/lib/supabase";
 import {
   aiReplies as sampleReplies,
+  competitorMentions as sampleCompetitorMentions,
   currentBusiness as sampleBusiness,
   opportunities as sampleOpportunities,
   sources as sampleSources,
+  teamMembers as sampleTeamMembers,
 } from "@/lib/sample-data";
 import type {
   AiReply,
   AuditLog,
   Business,
   ConnectedAccount,
+  CompetitorMention,
   FacebookManualPost,
   FacebookReplyHistory,
   Opportunity,
@@ -27,6 +30,13 @@ type BusinessRow = {
   phone: string | null;
   website: string | null;
   autopilot_mode: Business["autopilotMode"];
+  services_offered: string | null;
+  emergency_availability: string | null;
+  brands_serviced: string | null;
+  financing_options: string | null;
+  warranty_notes: string | null;
+  preferred_tone: string | null;
+  phrases_to_avoid: string | null;
 };
 
 type SourceRow = {
@@ -155,6 +165,19 @@ type ReputationMemoryRow = {
   updated_at: string;
 };
 
+type CompetitorMentionRow = {
+  id: string;
+  business_id: string;
+  opportunity_id: string | null;
+  source_id: string | null;
+  competitor_name: string;
+  town: string | null;
+  mention_count: number;
+  mentioned_before_us: boolean;
+  higher_priority: boolean;
+  created_at: string;
+};
+
 export async function getBusiness(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
@@ -164,7 +187,7 @@ export async function getBusiness(businessId: string | null) {
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid")
     .eq("id", businessId)
     .single<BusinessRow>();
 
@@ -344,7 +367,7 @@ export async function listTeamMembers(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return [] satisfies TeamMember[];
+    return sampleTeamMembers;
   }
 
   const { data, error } = await supabase
@@ -461,6 +484,29 @@ export async function listReputationMemories(businessId: string | null) {
   return data.map(mapReputationMemory);
 }
 
+export async function listCompetitorMentions(businessId: string | null) {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !businessId) {
+    return sampleCompetitorMentions;
+  }
+
+  const { data, error } = await supabase
+    .from("competitor_mentions")
+    .select(
+      "id,business_id,opportunity_id,source_id,competitor_name,town,mention_count,mentioned_before_us,higher_priority,created_at",
+    )
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false })
+    .returns<CompetitorMentionRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapCompetitorMention);
+}
+
 export async function getReputationMemorySummary(businessId: string | null) {
   const memories = await listReputationMemories(businessId);
   const activeMemories = memories.filter((memory) => memory.active).slice(0, 12);
@@ -486,6 +532,13 @@ function mapBusiness(row: BusinessRow): Business {
     phone: row.phone ?? "",
     website: row.website ?? "",
     autopilotMode: row.autopilot_mode,
+    servicesOffered: row.services_offered ?? "",
+    emergencyAvailability: row.emergency_availability ?? "",
+    brandsServiced: row.brands_serviced ?? "",
+    financingOptions: row.financing_options ?? "",
+    warrantyNotes: row.warranty_notes ?? "",
+    preferredTone: row.preferred_tone ?? "",
+    phrasesToAvoid: row.phrases_to_avoid ?? "",
   };
 }
 
@@ -641,5 +694,20 @@ function mapReputationMemory(row: ReputationMemoryRow): ReputationMemory {
     active: row.active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+function mapCompetitorMention(row: CompetitorMentionRow): CompetitorMention {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    opportunityId: row.opportunity_id ?? undefined,
+    sourceId: row.source_id ?? undefined,
+    competitorName: row.competitor_name,
+    town: row.town ?? undefined,
+    mentionCount: row.mention_count,
+    mentionedBeforeUs: row.mentioned_before_us,
+    higherPriority: row.higher_priority,
+    createdAt: row.created_at,
   };
 }

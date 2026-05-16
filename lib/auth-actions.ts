@@ -63,6 +63,11 @@ export async function signupAction(formData: FormData) {
       website,
       autopilot_mode: "off",
       tone_rules: "Helpful local pro, clear, specific, and never pushy.",
+      services_offered:
+        "AC repair, heating repair, maintenance, heat pumps, mini-splits, installations.",
+      emergency_availability: "Same-day emergency help when schedules allow.",
+      preferred_tone: "Helpful, practical, local, and not salesy.",
+      phrases_to_avoid: "Best in town, cheapest, guaranteed today, call now.",
     })
     .select("id")
     .single();

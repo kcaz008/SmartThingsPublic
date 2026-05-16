@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { formatDateTime, summarizeText } from "@/lib/format";
 import type { Opportunity, Source } from "@/lib/types";
+import type { LeadIntelligence } from "@/lib/lead-intelligence";
 import { PlainBadge, StatusBadge, UrgencyBadge } from "@/components/status-badge";
 
 export function OpportunityCard({
   opportunity,
   source,
+  intelligence,
 }: {
   opportunity: Opportunity;
   source?: Source;
+  intelligence?: LeadIntelligence;
 }) {
   return (
     <Link
@@ -19,6 +22,9 @@ export function OpportunityCard({
         <StatusBadge status={opportunity.status} />
         <UrgencyBadge urgency={opportunity.urgency} />
         <PlainBadge>{opportunity.leadScore} lead score</PlainBadge>
+        {intelligence ? (
+          <PlainBadge>{intelligence.temperature} lead</PlainBadge>
+        ) : null}
       </div>
       <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
@@ -43,6 +49,34 @@ export function OpportunityCard({
         <span>{opportunity.detectedTown}</span>
         <span>{formatDateTime(opportunity.createdAt)}</span>
       </div>
+      {intelligence ? (
+        <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm md:grid-cols-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+              Next action
+            </p>
+            <p className="mt-1 font-bold text-slate-900">
+              {intelligence.suggestedNextAction}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+              Route to
+            </p>
+            <p className="mt-1 font-bold text-slate-900">
+              {intelligence.bestResponder}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+              Speed
+            </p>
+            <p className="mt-1 font-bold text-slate-900">
+              {intelligence.recommendedResponseSpeed}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </Link>
   );
 }

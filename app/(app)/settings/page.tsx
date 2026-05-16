@@ -100,6 +100,83 @@ export default async function SettingsPage() {
             </Field>
           </section>
 
+          <section>
+            <h2 className="text-xl font-black text-slate-950">
+              Company knowledge
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              AI replies use these details to stay accurate, vary wording, and
+              avoid claims you do not want made in public threads.
+            </p>
+            <div className="mt-5 grid gap-5 md:grid-cols-2">
+              <Field label="Services offered">
+                <textarea
+                  name="servicesOffered"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.servicesOffered}
+                />
+              </Field>
+              <Field label="Emergency availability">
+                <textarea
+                  name="emergencyAvailability"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.emergencyAvailability}
+                />
+              </Field>
+              <Field label="Brands serviced">
+                <textarea
+                  name="brandsServiced"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.brandsServiced}
+                />
+              </Field>
+              <Field label="Financing options">
+                <textarea
+                  name="financingOptions"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.financingOptions}
+                />
+              </Field>
+              <Field label="Warranty notes">
+                <textarea
+                  name="warrantyNotes"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.warrantyNotes}
+                />
+              </Field>
+              <Field label="Preferred tone">
+                <textarea
+                  name="preferredTone"
+                  disabled={!canEdit}
+                  rows={4}
+                  className={inputClassName}
+                  defaultValue={currentBusiness.preferredTone}
+                />
+              </Field>
+              <div className="md:col-span-2">
+                <Field label="Phrases to avoid">
+                  <textarea
+                    name="phrasesToAvoid"
+                    disabled={!canEdit}
+                    rows={4}
+                    className={inputClassName}
+                    defaultValue={currentBusiness.phrasesToAvoid}
+                  />
+                </Field>
+              </div>
+            </div>
+          </section>
+
           <button
             type="submit"
             disabled={!canEdit}

@@ -6,9 +6,9 @@ const {
   SEED_USER_EMAIL,
   SEED_USER_PASSWORD,
   SEED_USER_FULL_NAME = "LocalSignal Owner",
-  SEED_BUSINESS_NAME = "Cardinal Heating & Air",
-  SEED_BUSINESS_SERVICE_AREA = "St. Louis County, St. Charles County",
-  SEED_BUSINESS_PHONE = "(314) 555-0199",
+  SEED_BUSINESS_NAME = "Atlantic Climate Systems",
+  SEED_BUSINESS_SERVICE_AREA = "Nassau County, Suffolk County, Queens, and western Long Island",
+  SEED_BUSINESS_PHONE = "(516) 777-0242",
   SEED_BUSINESS_WEBSITE = "https://example.com",
 } = process.env;
 
@@ -47,6 +47,19 @@ const { data: business, error: businessError } = await supabase
     autopilot_mode: "off",
     tone_rules:
       "Helpful local HVAC pro, clear, specific, never pushy, and no auto-posting claims.",
+    services_offered:
+      "AC repair, heating repair, maintenance, installations, heat pumps, mini-splits, indoor air quality.",
+    emergency_availability:
+      "Same-day emergency HVAC help when schedules allow; never promise a slot before dispatch confirms.",
+    brands_serviced:
+      "Carrier, Trane, Lennox, Rheem, Goodman, Mitsubishi, Fujitsu, Bosch, Navien, and most major brands.",
+    financing_options: "Financing may be available for qualifying replacements.",
+    warranty_notes:
+      "Warranty depends on manufacturer coverage, equipment age, and repair type.",
+    preferred_tone:
+      "Calm, practical, Long Island local, and helpful without sounding like an ad.",
+    phrases_to_avoid:
+      "Best in town, cheapest, guaranteed today, call now, we beat any price.",
   })
   .select("id")
   .single();
@@ -95,16 +108,16 @@ if (teamMemberError || !teamMember) {
 await supabase.from("sources").insert([
   {
     business_id: business.id,
-    name: "Webster Groves Community",
+    name: "Garden City Moms & Neighbors",
     type: "facebook_group",
-    town: "Webster Groves",
+    town: "Garden City",
     active: true,
   },
   {
     business_id: business.id,
     name: "Manual intake",
     type: "manual",
-    town: "All service areas",
+    town: "Long Island",
     active: true,
   },
 ]);
@@ -116,7 +129,7 @@ await supabase.from("connected_accounts").insert({
   provider: "facebook_group",
   display_name: SEED_USER_FULL_NAME,
   status: "not_connected",
-  connected_groups: ["Webster Groves Community"],
+  connected_groups: ["Garden City Moms & Neighbors"],
   scopes: ["pages_read_engagement"],
   notes:
     "Seed placeholder only. Use official Meta OAuth/API before connecting.",
@@ -141,13 +154,22 @@ await supabase.from("reputation_memories").insert([
   {
     business_id: business.id,
     memory_type: "group_dislikes_promo",
-    subject: "Webster Groves Community",
+    subject: "Garden City Moms & Neighbors",
     content:
       "Avoid promotional language and phone-number-first replies; this group responds better to helpful context and soft offers.",
     score: 91,
     evidence_count: 2,
   },
 ]);
+
+await supabase.from("competitor_mentions").insert({
+  business_id: business.id,
+  competitor_name: "Cool Breeze",
+  town: "Garden City",
+  mention_count: 2,
+  mentioned_before_us: true,
+  higher_priority: true,
+});
 
 await supabase.from("audit_logs").insert({
   business_id: business.id,

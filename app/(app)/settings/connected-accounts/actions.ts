@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
+import { formatCompanyKnowledgeForAi } from "@/lib/company-knowledge";
 import { getBusiness, getReputationMemorySummary } from "@/lib/data";
 import { createAiAnalysis } from "@/lib/openai";
 import { createSupabaseServerClient } from "@/lib/supabase";
@@ -233,6 +234,7 @@ export async function importManualFacebookPostAction(formData: FormData) {
     company_phone: business.phone,
     tone_rules: [
       business.toneRules,
+      formatCompanyKnowledgeForAi(business),
       reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
     ]
       .filter(Boolean)

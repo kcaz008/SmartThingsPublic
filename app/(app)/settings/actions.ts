@@ -31,6 +31,15 @@ export async function updateBusinessSettingsAction(formData: FormData) {
     website: String(formData.get("website") ?? "").trim(),
     tone_rules: String(formData.get("toneRules") ?? "").trim(),
     autopilot_mode: autopilotModes.has(autopilotMode) ? autopilotMode : "off",
+    services_offered: String(formData.get("servicesOffered") ?? "").trim(),
+    emergency_availability: String(
+      formData.get("emergencyAvailability") ?? "",
+    ).trim(),
+    brands_serviced: String(formData.get("brandsServiced") ?? "").trim(),
+    financing_options: String(formData.get("financingOptions") ?? "").trim(),
+    warranty_notes: String(formData.get("warrantyNotes") ?? "").trim(),
+    preferred_tone: String(formData.get("preferredTone") ?? "").trim(),
+    phrases_to_avoid: String(formData.get("phrasesToAvoid") ?? "").trim(),
   };
 
   if (!payload.name || !payload.service_area || !payload.tone_rules) {

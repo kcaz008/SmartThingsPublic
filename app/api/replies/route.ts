@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
+import { formatCompanyKnowledgeForAi } from "@/lib/company-knowledge";
 import {
   getBusiness,
   getOpportunity,
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     company_phone: currentBusiness.phone,
     tone_rules: [
       currentBusiness.toneRules,
+      formatCompanyKnowledgeForAi(currentBusiness),
       reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
     ]
       .filter(Boolean)

@@ -43,6 +43,7 @@ const requiredTables = [
   "facebook_manual_posts",
   "facebook_reply_history",
   "reputation_memories",
+  "competitor_mentions",
   "audit_logs",
 ];
 
