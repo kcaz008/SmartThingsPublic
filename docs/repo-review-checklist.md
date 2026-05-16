@@ -27,8 +27,9 @@
   connected accounts, and audit logs when Supabase is configured.
 - Manual intake did not persist leads or drafts. Fixed by saving
   `opportunities` and `ai_replies` with draft/manual approval defaults.
-- No schema for audit logs, target keywords, or safe connected accounts. Fixed
-  in `supabase/schema.sql` and a migration.
+- No schema for audit logs, target keywords, team profiles, safe connected
+  accounts, or manual Facebook reply history. Fixed in `supabase/schema.sql`
+  and migrations.
 - API routes had no auth or rate limits. Fixed with auth checks and in-memory
   per-user limits.
 
@@ -40,7 +41,8 @@
   support tenant isolation, but the UI currently uses one active business per
   user.
 - Connected account OAuth is a safe placeholder only. Real integrations must
-  use official APIs/OAuth and encrypted server-side token storage.
+  use official APIs/OAuth and encrypted server-side token storage; token
+  placeholder columns are intentionally not exposed in the UI.
 - Audit logging depends on `SUPABASE_SERVICE_ROLE_KEY`. Production should also
   add monitoring/alerting for failed audit writes.
 - There is no automated CI for the Next.js app; existing CircleCI config is for
@@ -59,5 +61,10 @@
 - Autopilot defaults to `off`; manual approval is the default workflow.
 - The app creates reply drafts and logs user actions; it does not auto-post.
 - Connected accounts intentionally do not store external account passwords.
+- Facebook setup copy explicitly says Meta login/API will be used and Facebook
+  passwords must not be entered.
+- Manual Facebook mode stores pasted post/comment data, tracks responder
+  history and comments-ago, generates an AI suggestion, and prevents duplicate
+  replies for the same post/team member.
 - Source/keyword setup warns that official APIs/OAuth are required for private
   or platform-governed data access.

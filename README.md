@@ -62,9 +62,8 @@ one business-name mention.
 
 ## Supabase
 
-Apply `supabase/schema.sql` in a new project, or apply
-`supabase/migrations/20260516210000_localsignal_hardening.sql` to an existing
-LocalSignal schema.
+Apply `supabase/schema.sql` in a new project, or apply the files in
+`supabase/migrations/` to an existing LocalSignal schema.
 
 The schema creates:
 
@@ -72,8 +71,11 @@ The schema creates:
 - `sources`
 - `opportunities`
 - `ai_replies`
+- `team_members`
 - `target_keywords`
 - `connected_accounts`
+- `facebook_manual_posts`
+- `facebook_reply_history`
 - `audit_logs`
 
 The schema includes opportunity statuses, autopilot modes, source types,
@@ -116,7 +118,9 @@ To also verify login for a test user, set `CHECK_USER_EMAIL` and
 - Opportunity Detail: original post, AI analysis, draft, copy-to-clipboard
 - Sources: tracked community/source records and target keywords
 - Settings: business profile, tone rules, autopilot mode, audit log
-- Connected Accounts: safe OAuth/API placeholders with no credential storage
+- Connected Accounts: team profiles, safe Meta OAuth placeholders, Facebook
+  group/page status, and manual Facebook demo reply history with duplicate
+  prevention
 
 ## Local end-to-end flow
 

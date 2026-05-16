@@ -96,6 +96,16 @@ export async function signupAction(formData: FormData) {
     );
   }
 
+  await serviceClient.from("team_members").insert({
+    business_id: business.id,
+    auth_user_id: createdUser.user.id,
+    full_name: fullName,
+    email,
+    role: "owner",
+    phone: phone || null,
+    active: true,
+  });
+
   await logAuditEvent({
     businessId: business.id,
     userId: createdUser.user.id,

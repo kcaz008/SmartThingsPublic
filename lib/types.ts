@@ -27,6 +27,7 @@ export type SourceType =
   | "reddit"
   | "manual"
   | "other";
+export type Platform = "facebook" | "nextdoor" | "reddit" | "manual" | "other";
 export type IntentType =
   | "recommendation_request"
   | "urgent_repair"
@@ -61,15 +62,62 @@ export type TargetKeyword = {
   createdAt: string;
 };
 
+export type TeamMember = {
+  id: string;
+  businessId: string;
+  authUserId?: string;
+  fullName: string;
+  email: string;
+  role: User["role"];
+  phone?: string;
+  facebookDisplayName?: string;
+  active: boolean;
+  createdAt: string;
+};
+
 export type ConnectedAccount = {
   id: string;
   businessId: string;
-  provider: SourceType;
+  teamMemberId?: string;
+  platform: Platform;
   displayName: string;
-  status: "not_connected" | "pending_oauth" | "connected" | "error";
+  status:
+    | "not_connected"
+    | "pending_oauth"
+    | "connected"
+    | "needs_reauth"
+    | "error";
+  externalAccountId?: string;
+  connectedGroups: string[];
+  scopes: string[];
   notes?: string;
   createdAt: string;
-  lastConnectedAt?: string;
+  connectedAt?: string;
+  lastSyncAt?: string;
+};
+
+export type FacebookManualPost = {
+  id: string;
+  businessId: string;
+  sourceId?: string;
+  externalPostId?: string;
+  postUrl?: string;
+  authorName?: string;
+  postText: string;
+  commentCount: number;
+  createdAt: string;
+};
+
+export type FacebookReplyHistory = {
+  id: string;
+  businessId: string;
+  manualPostId: string;
+  teamMemberId?: string;
+  aiReplyId?: string;
+  responseText: string;
+  commentsAgo: number;
+  respondedAt: string;
+  createdAt: string;
 };
 
 export type AuditLog = {

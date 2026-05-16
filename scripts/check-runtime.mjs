@@ -37,8 +37,11 @@ const requiredTables = [
   "sources",
   "opportunities",
   "ai_replies",
+  "team_members",
   "target_keywords",
   "connected_accounts",
+  "facebook_manual_posts",
+  "facebook_reply_history",
   "audit_logs",
 ];
 

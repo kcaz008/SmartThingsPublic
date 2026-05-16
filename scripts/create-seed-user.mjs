@@ -72,6 +72,26 @@ if (userError || !createdUser.user) {
   throw userError ?? new Error("Unable to create seed user.");
 }
 
+const { data: teamMember, error: teamMemberError } = await supabase
+  .from("team_members")
+  .insert({
+    business_id: business.id,
+    auth_user_id: createdUser.user.id,
+    full_name: SEED_USER_FULL_NAME,
+    email: SEED_USER_EMAIL,
+    role: "owner",
+    phone: SEED_BUSINESS_PHONE,
+    facebook_display_name: SEED_USER_FULL_NAME,
+    active: true,
+  })
+  .select("id")
+  .single();
+
+if (teamMemberError || !teamMember) {
+  await supabase.from("businesses").delete().eq("id", business.id);
+  throw teamMemberError ?? new Error("Unable to create seed team member.");
+}
+
 await supabase.from("sources").insert([
   {
     business_id: business.id,
@@ -88,6 +108,19 @@ await supabase.from("sources").insert([
     active: true,
   },
 ]);
+
+await supabase.from("connected_accounts").insert({
+  business_id: business.id,
+  team_member_id: teamMember.id,
+  platform: "facebook",
+  provider: "facebook_group",
+  display_name: SEED_USER_FULL_NAME,
+  status: "not_connected",
+  connected_groups: ["Webster Groves Community"],
+  scopes: ["pages_read_engagement"],
+  notes:
+    "Seed placeholder only. Use official Meta OAuth/API before connecting.",
+});
 
 await supabase.from("target_keywords").insert([
   { business_id: business.id, keyword: "AC not cooling" },

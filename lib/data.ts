@@ -10,9 +10,12 @@ import type {
   AuditLog,
   Business,
   ConnectedAccount,
+  FacebookManualPost,
+  FacebookReplyHistory,
   Opportunity,
   Source,
   TargetKeyword,
+  TeamMember,
 } from "@/lib/types";
 
 type BusinessRow = {
@@ -72,12 +75,55 @@ type KeywordRow = {
 type ConnectedAccountRow = {
   id: string;
   business_id: string;
-  provider: ConnectedAccount["provider"];
+  team_member_id: string | null;
+  platform: ConnectedAccount["platform"];
+  provider: Source["type"] | null;
+  external_account_id: string | null;
   display_name: string;
   status: ConnectedAccount["status"];
+  connected_groups: string[] | null;
+  scopes: string[] | null;
   notes: string | null;
   created_at: string;
-  last_connected_at: string | null;
+  connected_at: string | null;
+  last_sync_at: string | null;
+};
+
+type TeamMemberRow = {
+  id: string;
+  business_id: string;
+  auth_user_id: string | null;
+  full_name: string;
+  email: string;
+  role: TeamMember["role"];
+  phone: string | null;
+  facebook_display_name: string | null;
+  active: boolean;
+  created_at: string;
+};
+
+type FacebookManualPostRow = {
+  id: string;
+  business_id: string;
+  source_id: string | null;
+  external_post_id: string | null;
+  post_url: string | null;
+  author_name: string | null;
+  post_text: string;
+  comment_count: number;
+  created_at: string;
+};
+
+type FacebookReplyHistoryRow = {
+  id: string;
+  business_id: string;
+  manual_post_id: string;
+  team_member_id: string | null;
+  ai_reply_id: string | null;
+  response_text: string;
+  comments_ago: number;
+  responded_at: string;
+  created_at: string;
 };
 
 type AuditLogRow = {
@@ -263,7 +309,7 @@ export async function listConnectedAccounts(businessId: string | null) {
   const { data, error } = await supabase
     .from("connected_accounts")
     .select(
-      "id,business_id,provider,display_name,status,notes,created_at,last_connected_at",
+      "id,business_id,team_member_id,platform,provider,external_account_id,display_name,status,connected_groups,scopes,notes,created_at,connected_at,last_sync_at",
     )
     .eq("business_id", businessId)
     .order("created_at", { ascending: false })
@@ -274,6 +320,78 @@ export async function listConnectedAccounts(businessId: string | null) {
   }
 
   return data.map(mapConnectedAccount);
+}
+
+export async function listTeamMembers(businessId: string | null) {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !businessId) {
+    return [] satisfies TeamMember[];
+  }
+
+  const { data, error } = await supabase
+    .from("team_members")
+    .select(
+      "id,business_id,auth_user_id,full_name,email,role,phone,facebook_display_name,active,created_at",
+    )
+    .eq("business_id", businessId)
+    .order("active", { ascending: false })
+    .order("full_name")
+    .returns<TeamMemberRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapTeamMember);
+}
+
+export async function listFacebookManualPosts(businessId: string | null) {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !businessId) {
+    return [] satisfies FacebookManualPost[];
+  }
+
+  const { data, error } = await supabase
+    .from("facebook_manual_posts")
+    .select(
+      "id,business_id,source_id,external_post_id,post_url,author_name,post_text,comment_count,created_at",
+    )
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false })
+    .limit(12)
+    .returns<FacebookManualPostRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapFacebookManualPost);
+}
+
+export async function listFacebookReplyHistory(businessId: string | null) {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !businessId) {
+    return [] satisfies FacebookReplyHistory[];
+  }
+
+  const { data, error } = await supabase
+    .from("facebook_reply_history")
+    .select(
+      "id,business_id,manual_post_id,team_member_id,ai_reply_id,response_text,comments_ago,responded_at,created_at",
+    )
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false })
+    .limit(20)
+    .returns<FacebookReplyHistoryRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapFacebookReplyHistory);
 }
 
 export async function listAuditLogs(businessId: string | null, limit = 10) {
@@ -368,13 +486,71 @@ function mapConnectedAccount(row: ConnectedAccountRow): ConnectedAccount {
   return {
     id: row.id,
     businessId: row.business_id,
-    provider: row.provider,
+    teamMemberId: row.team_member_id ?? undefined,
+    platform: row.platform ?? platformFromProvider(row.provider),
     displayName: row.display_name,
     status: row.status,
+    externalAccountId: row.external_account_id ?? undefined,
+    connectedGroups: row.connected_groups ?? [],
+    scopes: row.scopes ?? [],
     notes: row.notes ?? undefined,
     createdAt: row.created_at,
-    lastConnectedAt: row.last_connected_at ?? undefined,
+    connectedAt: row.connected_at ?? undefined,
+    lastSyncAt: row.last_sync_at ?? undefined,
   };
+}
+
+function mapTeamMember(row: TeamMemberRow): TeamMember {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    authUserId: row.auth_user_id ?? undefined,
+    fullName: row.full_name,
+    email: row.email,
+    role: row.role,
+    phone: row.phone ?? undefined,
+    facebookDisplayName: row.facebook_display_name ?? undefined,
+    active: row.active,
+    createdAt: row.created_at,
+  };
+}
+
+function mapFacebookManualPost(row: FacebookManualPostRow): FacebookManualPost {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    sourceId: row.source_id ?? undefined,
+    externalPostId: row.external_post_id ?? undefined,
+    postUrl: row.post_url ?? undefined,
+    authorName: row.author_name ?? undefined,
+    postText: row.post_text,
+    commentCount: row.comment_count,
+    createdAt: row.created_at,
+  };
+}
+
+function mapFacebookReplyHistory(
+  row: FacebookReplyHistoryRow,
+): FacebookReplyHistory {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    manualPostId: row.manual_post_id,
+    teamMemberId: row.team_member_id ?? undefined,
+    aiReplyId: row.ai_reply_id ?? undefined,
+    responseText: row.response_text,
+    commentsAgo: row.comments_ago,
+    respondedAt: row.responded_at,
+    createdAt: row.created_at,
+  };
+}
+
+function platformFromProvider(provider: Source["type"] | null) {
+  if (provider === "facebook_group") {
+    return "facebook";
+  }
+
+  return provider ?? "other";
 }
 
 function mapAuditLog(row: AuditLogRow): AuditLog {
