@@ -141,6 +141,22 @@ export default async function SettingsPage() {
             </Link>
           </div>
 
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Reputation memory
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Track which tone works, which replies convert, who closes best,
+              and which groups dislike promotional comments.
+            </p>
+            <Link
+              href="/settings/reputation-memory"
+              className="mt-4 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+            >
+              Manage memory
+            </Link>
+          </div>
+
           <div className="rounded-3xl border border-amber-100 bg-signal-amber p-5">
             <p className="text-sm font-bold text-amber-950">
               Autopilot promise

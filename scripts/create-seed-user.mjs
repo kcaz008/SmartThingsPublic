@@ -128,6 +128,27 @@ await supabase.from("target_keywords").insert([
   { business_id: business.id, keyword: "thermostat blank" },
 ]);
 
+await supabase.from("reputation_memories").insert([
+  {
+    business_id: business.id,
+    memory_type: "tone_works",
+    subject: "Emergency AC posts",
+    content:
+      "Empathetic, practical replies that mention one troubleshooting detail perform better than sales-first messages.",
+    score: 84,
+    evidence_count: 3,
+  },
+  {
+    business_id: business.id,
+    memory_type: "group_dislikes_promo",
+    subject: "Webster Groves Community",
+    content:
+      "Avoid promotional language and phone-number-first replies; this group responds better to helpful context and soft offers.",
+    score: 91,
+    evidence_count: 2,
+  },
+]);
+
 await supabase.from("audit_logs").insert({
   business_id: business.id,
   user_id: createdUser.user.id,

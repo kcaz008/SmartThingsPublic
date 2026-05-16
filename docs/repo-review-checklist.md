@@ -66,5 +66,8 @@
 - Manual Facebook mode stores pasted post/comment data, tracks responder
   history and comments-ago, generates an AI suggestion, and prevents duplicate
   replies for the same post/team member.
+- Reputation Memory stores tone, conversion, employee-closing, and
+  promo-sensitive group learnings and includes active notes in AI drafting
+  guidance.
 - Source/keyword setup warns that official APIs/OAuth are required for private
   or platform-governed data access.

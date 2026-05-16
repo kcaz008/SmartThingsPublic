@@ -33,6 +33,13 @@ create type public.connected_account_status as enum (
   'error'
 );
 
+create type public.reputation_memory_type as enum (
+  'tone_works',
+  'reply_converts',
+  'employee_closes',
+  'group_dislikes_promo'
+);
+
 create table public.businesses (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -152,6 +159,23 @@ create table public.facebook_reply_history (
   unique (manual_post_id, team_member_id)
 );
 
+create table public.reputation_memories (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid not null references public.businesses(id) on delete cascade,
+  memory_type public.reputation_memory_type not null,
+  subject text not null,
+  source_id uuid references public.sources(id) on delete set null,
+  team_member_id uuid references public.team_members(id) on delete set null,
+  opportunity_id uuid references public.opportunities(id) on delete set null,
+  content text not null,
+  score integer not null default 50 check (score between 0 and 100),
+  evidence_count integer not null default 1 check (evidence_count >= 0),
+  metadata jsonb not null default '{}'::jsonb,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
@@ -193,6 +217,9 @@ create index facebook_manual_posts_business_created_idx
 create index facebook_reply_history_business_created_idx
   on public.facebook_reply_history (business_id, created_at desc);
 
+create index reputation_memories_business_type_idx
+  on public.reputation_memories (business_id, memory_type, active, score desc);
+
 create index audit_logs_business_created_idx
   on public.audit_logs (business_id, created_at desc);
 
@@ -205,6 +232,7 @@ alter table public.target_keywords enable row level security;
 alter table public.connected_accounts enable row level security;
 alter table public.facebook_manual_posts enable row level security;
 alter table public.facebook_reply_history enable row level security;
+alter table public.reputation_memories enable row level security;
 alter table public.audit_logs enable row level security;
 
 create or replace function public.current_business_id()
@@ -275,6 +303,11 @@ create policy "Users can manage manual Facebook posts"
 
 create policy "Users can manage Facebook reply history"
   on public.facebook_reply_history for all
+  using (business_id = public.current_business_id())
+  with check (business_id = public.current_business_id());
+
+create policy "Users can manage reputation memories"
+  on public.reputation_memories for all
   using (business_id = public.current_business_id())
   with check (business_id = public.current_business_id());
 

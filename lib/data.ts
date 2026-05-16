@@ -13,6 +13,7 @@ import type {
   FacebookManualPost,
   FacebookReplyHistory,
   Opportunity,
+  ReputationMemory,
   Source,
   TargetKeyword,
   TeamMember,
@@ -135,6 +136,23 @@ type AuditLogRow = {
   target_id: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
+};
+
+type ReputationMemoryRow = {
+  id: string;
+  business_id: string;
+  memory_type: ReputationMemory["memoryType"];
+  subject: string;
+  source_id: string | null;
+  team_member_id: string | null;
+  opportunity_id: string | null;
+  content: string;
+  score: number;
+  evidence_count: number;
+  metadata: Record<string, unknown> | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 export async function getBusiness(businessId: string | null) {
@@ -418,6 +436,47 @@ export async function listAuditLogs(businessId: string | null, limit = 10) {
   return data.map(mapAuditLog);
 }
 
+export async function listReputationMemories(businessId: string | null) {
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !businessId) {
+    return [] satisfies ReputationMemory[];
+  }
+
+  const { data, error } = await supabase
+    .from("reputation_memories")
+    .select(
+      "id,business_id,memory_type,subject,source_id,team_member_id,opportunity_id,content,score,evidence_count,metadata,active,created_at,updated_at",
+    )
+    .eq("business_id", businessId)
+    .order("active", { ascending: false })
+    .order("score", { ascending: false })
+    .order("updated_at", { ascending: false })
+    .returns<ReputationMemoryRow[]>();
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapReputationMemory);
+}
+
+export async function getReputationMemorySummary(businessId: string | null) {
+  const memories = await listReputationMemories(businessId);
+  const activeMemories = memories.filter((memory) => memory.active).slice(0, 12);
+
+  if (!activeMemories.length) {
+    return "";
+  }
+
+  return activeMemories
+    .map((memory) => {
+      const label = memory.memoryType.replaceAll("_", " ");
+      return `${label}: ${memory.subject} - ${memory.content}`;
+    })
+    .join("\n");
+}
+
 function mapBusiness(row: BusinessRow): Business {
   return {
     id: row.id,
@@ -563,5 +622,24 @@ function mapAuditLog(row: AuditLogRow): AuditLog {
     targetId: row.target_id ?? undefined,
     metadata: row.metadata ?? {},
     createdAt: row.created_at,
+  };
+}
+
+function mapReputationMemory(row: ReputationMemoryRow): ReputationMemory {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    memoryType: row.memory_type,
+    subject: row.subject,
+    sourceId: row.source_id ?? undefined,
+    teamMemberId: row.team_member_id ?? undefined,
+    opportunityId: row.opportunity_id ?? undefined,
+    content: row.content,
+    score: row.score,
+    evidenceCount: row.evidence_count,
+    metadata: row.metadata ?? {},
+    active: row.active,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }

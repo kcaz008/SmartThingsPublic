@@ -76,6 +76,7 @@ The schema creates:
 - `connected_accounts`
 - `facebook_manual_posts`
 - `facebook_reply_history`
+- `reputation_memories`
 - `audit_logs`
 
 The schema includes opportunity statuses, autopilot modes, source types,
@@ -118,6 +119,8 @@ To also verify login for a test user, set `CHECK_USER_EMAIL` and
 - Opportunity Detail: original post, AI analysis, draft, copy-to-clipboard
 - Sources: tracked community/source records and target keywords
 - Settings: business profile, tone rules, autopilot mode, audit log
+- Reputation Memory: tone, conversion, employee, and group-promotion learnings
+  used as AI drafting guidance
 - Connected Accounts: team profiles, safe Meta OAuth placeholders, Facebook
   group/page status, and manual Facebook demo reply history with duplicate
   prevention

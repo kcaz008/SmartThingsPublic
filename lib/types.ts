@@ -28,6 +28,11 @@ export type SourceType =
   | "manual"
   | "other";
 export type Platform = "facebook" | "nextdoor" | "reddit" | "manual" | "other";
+export type ReputationMemoryType =
+  | "tone_works"
+  | "reply_converts"
+  | "employee_closes"
+  | "group_dislikes_promo";
 export type IntentType =
   | "recommendation_request"
   | "urgent_repair"
@@ -118,6 +123,23 @@ export type FacebookReplyHistory = {
   commentsAgo: number;
   respondedAt: string;
   createdAt: string;
+};
+
+export type ReputationMemory = {
+  id: string;
+  businessId: string;
+  memoryType: ReputationMemoryType;
+  subject: string;
+  sourceId?: string;
+  teamMemberId?: string;
+  opportunityId?: string;
+  content: string;
+  score: number;
+  evidenceCount: number;
+  metadata: Record<string, unknown>;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type AuditLog = {

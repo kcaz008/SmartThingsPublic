@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
-import { getBusiness } from "@/lib/data";
+import { getBusiness, getReputationMemorySummary } from "@/lib/data";
 import {
   createAiAnalysis,
   localSignalAnalysisToOpportunityAnalysis,
@@ -44,7 +44,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const currentBusiness = await getBusiness(authContext.businessId);
+  const [currentBusiness, reputationMemory] = await Promise.all([
+    getBusiness(authContext.businessId),
+    getReputationMemorySummary(authContext.businessId),
+  ]);
   const supabase = await createSupabaseServerClient();
   const sourceId = String(body.sourceId ?? body.source_id ?? "").trim();
   const sourceName = String(body.source_name ?? body.sourceName ?? "Manual intake");
@@ -56,7 +59,12 @@ export async function POST(request: Request) {
     service_area: String(body.service_area ?? currentBusiness.serviceArea),
     company_name: String(body.company_name ?? currentBusiness.name),
     company_phone: String(body.company_phone ?? currentBusiness.phone),
-    tone_rules: String(body.tone_rules ?? currentBusiness.toneRules),
+    tone_rules: [
+      String(body.tone_rules ?? currentBusiness.toneRules),
+      reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
   const analysis = localSignalAnalysisToOpportunityAnalysis(aiAnalysis);
   let opportunityId: string | undefined;

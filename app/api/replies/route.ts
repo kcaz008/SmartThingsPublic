@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
-import { getBusiness, getOpportunity, getSource } from "@/lib/data";
+import {
+  getBusiness,
+  getOpportunity,
+  getReputationMemorySummary,
+  getSource,
+} from "@/lib/data";
 import { createAiAnalysis } from "@/lib/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase";
@@ -40,9 +45,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const [currentBusiness, source] = await Promise.all([
+  const [currentBusiness, source, reputationMemory] = await Promise.all([
     getBusiness(authContext.businessId),
     getSource(authContext.businessId, opportunity.sourceId),
+    getReputationMemorySummary(authContext.businessId),
   ]);
   const analysis = await createAiAnalysis({
     post_text: opportunity.originalText,
@@ -51,7 +57,12 @@ export async function POST(request: Request) {
     service_area: currentBusiness.serviceArea,
     company_name: currentBusiness.name,
     company_phone: currentBusiness.phone,
-    tone_rules: currentBusiness.toneRules,
+    tone_rules: [
+      currentBusiness.toneRules,
+      reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
   let replyId: string | undefined;
   const supabase = await createSupabaseServerClient();

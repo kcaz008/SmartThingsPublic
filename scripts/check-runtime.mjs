@@ -42,6 +42,7 @@ const requiredTables = [
   "connected_accounts",
   "facebook_manual_posts",
   "facebook_reply_history",
+  "reputation_memories",
   "audit_logs",
 ];
 

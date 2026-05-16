@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
-import { getBusiness } from "@/lib/data";
+import { getBusiness, getReputationMemorySummary } from "@/lib/data";
 import { createAiAnalysis } from "@/lib/openai";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { Platform, TeamMember } from "@/lib/types";
@@ -220,7 +220,10 @@ export async function importManualFacebookPostAction(formData: FormData) {
     return;
   }
 
-  const business = await getBusiness(authContext.businessId);
+  const [business, reputationMemory] = await Promise.all([
+    getBusiness(authContext.businessId),
+    getReputationMemorySummary(authContext.businessId),
+  ]);
   const aiAnalysis = await createAiAnalysis({
     post_text: postText,
     source_name: "Manual Facebook import",
@@ -228,7 +231,12 @@ export async function importManualFacebookPostAction(formData: FormData) {
     service_area: business.serviceArea,
     company_name: business.name,
     company_phone: business.phone,
-    tone_rules: business.toneRules,
+    tone_rules: [
+      business.toneRules,
+      reputationMemory ? `Reputation memory:\n${reputationMemory}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
 
   const { data: opportunity } = await supabase

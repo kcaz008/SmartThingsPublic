@@ -9,6 +9,7 @@ const navigation = [
   { href: "/opportunities/new", label: "Add Opportunity", icon: "Plus" },
   { href: "/sources", label: "Sources", icon: "Radar" },
   { href: "/settings", label: "Settings", icon: "Gear" },
+  { href: "/settings/reputation-memory", label: "Memory", icon: "Brain" },
   { href: "/settings/connected-accounts", label: "Connections", icon: "Link" },
 ];
 
