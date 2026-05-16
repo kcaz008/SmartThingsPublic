@@ -97,6 +97,18 @@ npm run seed:user
 The seed script requires `SEED_USER_PASSWORD`; it is intentionally blank in
 `.env.example` so no password is committed.
 
+### Runtime verification
+
+After `.env.local` contains real Supabase values and the schema is applied, run:
+
+```bash
+npm run check:runtime
+```
+
+That verifies the required Supabase tables are reachable with the service role.
+To also verify login for a test user, set `CHECK_USER_EMAIL` and
+`CHECK_USER_PASSWORD` in your shell or `.env.local` before running the command.
+
 ## MVP pages
 
 - Dashboard: command-center metrics, filters, source health, opportunities

@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "seed:user": "node scripts/create-seed-user.mjs"
+    "seed:user": "node scripts/create-seed-user.mjs",
+    "check:runtime": "node scripts/check-runtime.mjs"
   },
   "repository": {
     "type": "git",
