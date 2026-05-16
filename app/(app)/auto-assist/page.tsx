@@ -1,0 +1,178 @@
+import { PageHeader } from "@/components/page-header";
+import {
+  auditEventExamples,
+  crmFollowupExamples,
+  disclosureTemplates,
+  reviewQueueStages,
+} from "@/lib/safe-automation";
+
+const workflow = [
+  "Log into Facebook normally in your browser.",
+  "Open the Facebook group page you want to review.",
+  'Click the LocalSignal extension button: "Scan Current Page."',
+  "LocalSignal reads visible post text from that page only.",
+  "Relevant HVAC opportunities are returned as manual opportunity cards.",
+  "Copy a draft reply or mark each card ignored, replied, booked, or won.",
+];
+
+const rules = [
+  "No Facebook password storage.",
+  "No fake accounts.",
+  "No pretending to be a customer.",
+  "No automatic posting or comments.",
+  "No background scraping.",
+  "Only scans after the user clicks the button.",
+  "Only analyzes posts visible to the logged-in user.",
+];
+
+export default function AutoAssistPage() {
+  return (
+    <>
+      <PageHeader
+        eyebrow="Button-activated Auto-Assist"
+        title="Scan the current Facebook group page only when you ask."
+        description="LocalSignal's browser extension turns visible posts into HVAC opportunity cards for manual follow-up. It never logs into Facebook, stores credentials, scrapes in the background, or posts comments."
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
+        <section className="space-y-6">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <h2 className="text-2xl font-black text-slate-950">
+              Manual scan workflow
+            </h2>
+            <div className="mt-6 space-y-4">
+              {workflow.map((item, index) => (
+                <div
+                  key={item}
+                  className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                >
+                  <div className="grid size-9 shrink-0 place-items-center rounded-full bg-signal-blue text-sm font-black text-white">
+                    {index + 1}
+                  </div>
+                  <p className="text-sm font-semibold leading-6 text-slate-700">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Review queue
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">
+              Every reply stays human-approved.
+            </h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              {reviewQueueStages.map((stage) => (
+                <div key={stage.label} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="font-bold text-slate-950">{stage.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {stage.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Disclosure templates
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">
+              Replies identify the business honestly.
+            </h2>
+            <div className="mt-5 space-y-4">
+              {disclosureTemplates.map((template) => (
+                <div key={template.id} className="rounded-2xl bg-blue-50 p-4">
+                  <p className="font-bold text-blue-950">{template.name}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {template.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <div className="rounded-3xl border border-emerald-100 bg-signal-mint p-5">
+            <p className="text-sm font-bold text-emerald-950">
+              Extension location
+            </p>
+            <p className="mt-3 text-sm leading-6 text-emerald-950/80">
+              Load the unpacked extension from{" "}
+              <code className="rounded bg-white/70 px-1 py-0.5">
+                browser-extension
+              </code>{" "}
+              during MVP testing.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-blue-100 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Approved API connection
+            </p>
+            <h2 className="mt-3 text-xl font-black text-slate-950">
+              OAuth-style only
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              If Meta-approved APIs are available for a customer&apos;s use case,
+              LocalSignal should store scoped tokens from that official flow,
+              never Facebook passwords.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Audit events
+            </p>
+            <ul className="mt-4 space-y-2">
+              {auditEventExamples.map((event) => (
+                <li
+                  key={event}
+                  className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {event}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              CRM follow-up
+            </p>
+            <ul className="mt-4 space-y-2">
+              {crmFollowupExamples.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Safety rules
+            </p>
+            <ul className="mt-4 space-y-3">
+              {rules.map((rule) => (
+                <li
+                  key={rule}
+                  className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {rule}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}

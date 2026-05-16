@@ -59,7 +59,29 @@ authenticated user's `app_metadata.business_id` claim.
 ## MVP pages
 
 - Dashboard: command-center metrics, filters, source health, opportunities
+- Auto-Assist: browser extension workflow and safety rules
 - Add Opportunity: manual post intake with AI analysis and reply drafting
 - Opportunity Detail: original post, AI analysis, draft, copy-to-clipboard
 - Sources: tracked community/source records
 - Settings: business profile, tone rules, autopilot mode
+
+## Button-activated Auto-Assist extension
+
+The `browser-extension` folder contains a Manifest V3 extension for Facebook
+group pages. It does not store Facebook passwords, does not create or use fake
+accounts, does not scrape in the background, and does not post comments. The
+extension only injects a visible-post reader after the user clicks **Scan
+Current Page**, then sends those visible posts to `/api/extension/scan`.
+
+The scan API returns manual opportunity cards with group/source name, original
+post text, service type, urgency, town, lead score, and a suggested reply. The
+extension popup supports **Copy Reply**, **Mark Ignored**, **Mark Replied**,
+**Mark Booked**, and **Mark Won** as local manual actions.
+
+Safe automation replacements are included for prohibited flows:
+
+- Approved platform connections are modeled as OAuth/API-style scoped
+  connections, not password storage.
+- Audit events can record scans, copied replies, and manual status changes.
+- CRM follow-up tasks can be created outside Facebook for booked or won leads.
+- Disclosure templates keep replies honest about coming from the business.

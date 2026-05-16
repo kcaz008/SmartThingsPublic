@@ -100,3 +100,43 @@ export type AiReply = {
   postedManually: boolean;
   createdAt: string;
 };
+
+export type ApprovedPlatformConnection = {
+  id: string;
+  businessId: string;
+  platform: "facebook" | "meta" | "other";
+  externalAccountName: string;
+  permissionScope: string;
+  connectedAt: string;
+  active: boolean;
+};
+
+export type AuditEvent = {
+  id: string;
+  businessId: string;
+  opportunityId?: string;
+  eventType: string;
+  eventSummary: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type CrmFollowup = {
+  id: string;
+  businessId: string;
+  opportunityId?: string;
+  channel: "phone" | "email" | "crm" | "other";
+  summary: string;
+  dueAt?: string;
+  completed: boolean;
+  createdAt: string;
+};
+
+export type DisclosureTemplate = {
+  id: string;
+  businessId: string;
+  name: string;
+  body: string;
+  active: boolean;
+  createdAt: string;
+};

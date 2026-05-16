@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "LocalSignal Auto-Assist",
+  "description": "Button-activated scanning for visible Facebook group posts. No passwords, no background scraping, no auto-posting.",
+  "version": "0.1.0",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://www.facebook.com/*", "https://facebook.com/*"],
+  "action": {
+    "default_title": "LocalSignal Scan Current Page",
+    "default_popup": "popup.html"
+  }
+}
