@@ -25,6 +25,24 @@ npm run dev
 The app is demoable without API keys. If `OPENAI_API_KEY` is missing, the API
 routes return deterministic placeholder classification and reply drafts.
 
+## AI analysis contract
+
+`createAiAnalysis` in `lib/openai.ts` accepts:
+
+- `post_text`
+- `source_name`
+- `source_type`
+- `service_area`
+- `company_name`
+- `company_phone`
+- `tone_rules`
+
+It returns valid JSON with relevance, HVAC service type, detected town, urgency,
+lead score, sentiment, intent type, reasoning summary, and a suggested reply.
+The prompt and fallback enforce LocalSignal guardrails: no fake customer claims,
+no personal recommendations, non-salesy local tone, under 75 words, and at most
+one business-name mention.
+
 ## Supabase
 
 Apply `supabase/schema.sql` to create:

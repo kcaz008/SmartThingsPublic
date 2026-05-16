@@ -1,6 +1,35 @@
 import OpenAI from "openai";
 import type { AiAnalysis, Business } from "@/lib/types";
 
+export type LocalSignalAnalysisInput = {
+  post_text: string;
+  source_name: string;
+  source_type: string;
+  service_area: string;
+  company_name: string;
+  company_phone: string;
+  tone_rules: string;
+};
+
+export type LocalSignalAnalysisOutput = {
+  is_relevant: boolean;
+  service_type: string;
+  detected_town: string;
+  urgency: "low" | "medium" | "high";
+  lead_score: number;
+  sentiment: string;
+  intent_type:
+    | "recommendation_request"
+    | "urgent_repair"
+    | "price_check"
+    | "maintenance_question"
+    | "complaint"
+    | "not_relevant"
+    | "other";
+  reasoning_summary: string;
+  suggested_reply: string;
+};
+
 export type OpportunityInput = {
   title: string;
   postText: string;
@@ -16,6 +45,90 @@ function getOpenAiClient() {
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
+}
+
+export async function createAiAnalysis(
+  input: LocalSignalAnalysisInput,
+): Promise<LocalSignalAnalysisOutput> {
+  const client = getOpenAiClient();
+
+  if (!client) {
+    return placeholderLocalSignalAnalysis(input);
+  }
+
+  const response = await client.responses.create({
+    model: process.env.OPENAI_MODEL ?? "gpt-4.1-mini",
+    input: [
+      {
+        role: "system",
+        content: [
+          "You are LocalSignal's AI analysis function for local HVAC sales opportunities.",
+          "Only return valid JSON matching the provided schema.",
+          "Analyze whether the post is relevant to the company and draft one helpful manual reply.",
+          "Do not pretend to be a customer.",
+          "Do not make fake personal recommendations.",
+          'Do not say "I used them", "they did work for me", or anything implying personal experience.',
+          "Sound local, helpful, and human.",
+          "Keep suggested_reply under 75 words.",
+          "Mention the business name no more than once.",
+          "Do not be salesy.",
+          "Include light helpful context when appropriate.",
+        ].join(" "),
+      },
+      {
+        role: "user",
+        content: JSON.stringify(input),
+      },
+    ],
+    text: {
+      format: {
+        type: "json_schema",
+        name: "localsignal_ai_analysis",
+        schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            is_relevant: { type: "boolean" },
+            service_type: { type: "string" },
+            detected_town: { type: "string" },
+            urgency: { type: "string", enum: ["low", "medium", "high"] },
+            lead_score: { type: "integer", minimum: 0, maximum: 100 },
+            sentiment: { type: "string" },
+            intent_type: {
+              type: "string",
+              enum: [
+                "recommendation_request",
+                "urgent_repair",
+                "price_check",
+                "maintenance_question",
+                "complaint",
+                "not_relevant",
+                "other",
+              ],
+            },
+            reasoning_summary: { type: "string" },
+            suggested_reply: { type: "string" },
+          },
+          required: [
+            "is_relevant",
+            "service_type",
+            "detected_town",
+            "urgency",
+            "lead_score",
+            "sentiment",
+            "intent_type",
+            "reasoning_summary",
+            "suggested_reply",
+          ],
+        },
+      },
+    },
+  });
+
+  return normalizeLocalSignalAnalysis(
+    JSON.parse(response.output_text) as LocalSignalAnalysisOutput,
+    input,
+  );
 }
 
 export async function analyzeOpportunity(
@@ -77,6 +190,22 @@ export async function analyzeOpportunity(
   return JSON.parse(output) as AiAnalysis;
 }
 
+export function localSignalAnalysisToOpportunityAnalysis(
+  analysis: LocalSignalAnalysisOutput,
+): AiAnalysis {
+  return {
+    isServiceOpportunity: analysis.is_relevant,
+    category: analysis.service_type,
+    urgency: analysis.urgency,
+    confidence: analysis.lead_score / 100,
+    homeownerIntent: `${analysis.intent_type.replaceAll("_", " ")}; sentiment: ${
+      analysis.sentiment
+    }`,
+    recommendedAction: analysis.suggested_reply,
+    spamRisk: analysis.lead_score >= 70 ? "low" : analysis.lead_score >= 45 ? "medium" : "high",
+  };
+}
+
 export async function generateReplyDraft(
   business: Business,
   input: OpportunityInput,
@@ -136,6 +265,157 @@ function placeholderAnalysis(input: OpportunityInput): AiAnalysis {
       "Respond with empathy, one useful detail, and a low-pressure way to contact the business.",
     spamRisk: "low",
   };
+}
+
+function placeholderLocalSignalAnalysis(
+  input: LocalSignalAnalysisInput,
+): LocalSignalAnalysisOutput {
+  const text = input.post_text.toLowerCase();
+  const relevantPattern = /ac|a\/c|hvac|heat|furnace|air conditioner|thermostat|duct|mini[- ]?split/;
+  const isRelevant = relevantPattern.test(text);
+  const urgentPattern = /stopped|not cooling|no ac|no a\/c|broken|emergency|today|tonight|asap|leak|burning/;
+  const pricePattern = /quote|estimate|price|cost|second opinion|too high/;
+  const recommendationPattern = /recommend|referral|who do you use|anyone know|looking for/;
+  const maintenancePattern = /tune[- ]?up|filter|maintenance|noise|rattle|check/;
+  const urgency: LocalSignalAnalysisOutput["urgency"] = urgentPattern.test(text)
+    ? "high"
+    : pricePattern.test(text) || recommendationPattern.test(text)
+      ? "medium"
+      : "low";
+  const intentType: LocalSignalAnalysisOutput["intent_type"] = !isRelevant
+    ? "not_relevant"
+    : urgentPattern.test(text)
+      ? "urgent_repair"
+      : recommendationPattern.test(text)
+        ? "recommendation_request"
+        : pricePattern.test(text)
+          ? "price_check"
+          : maintenancePattern.test(text)
+            ? "maintenance_question"
+            : "other";
+  const detectedTown = detectTown(input.post_text, input.service_area);
+  const leadScore = !isRelevant
+    ? 12
+    : urgency === "high"
+      ? 88
+      : intentType === "recommendation_request" || intentType === "price_check"
+        ? 76
+        : 58;
+  const serviceType = !isRelevant
+    ? "Not Relevant"
+    : urgentPattern.test(text)
+      ? "HVAC Repair"
+      : pricePattern.test(text)
+        ? "HVAC Estimate"
+        : maintenancePattern.test(text)
+          ? "HVAC Maintenance"
+          : "HVAC Service";
+  const sentiment = /frustrat|annoy|upset|mad|hot|stressed|desperate/.test(text)
+    ? "frustrated"
+    : urgentPattern.test(text)
+      ? "concerned"
+      : "neutral";
+
+  return normalizeLocalSignalAnalysis(
+    {
+      is_relevant: isRelevant,
+      service_type: serviceType,
+      detected_town: detectedTown,
+      urgency,
+      lead_score: leadScore,
+      sentiment,
+      intent_type: intentType,
+      reasoning_summary: isRelevant
+        ? `User appears to need ${serviceType.toLowerCase()} help from a local provider.`
+        : "Post does not show clear HVAC service intent.",
+      suggested_reply: isRelevant
+        ? buildHelpfulReply(input, urgency)
+        : "This does not look like a fit for an HVAC reply right now.",
+    },
+    input,
+  );
+}
+
+function detectTown(postText: string, serviceArea: string) {
+  const townCandidates = serviceArea
+    .split(/[,;/|]|\band\b/)
+    .map((town) => town.trim())
+    .filter(Boolean);
+  const normalizedPost = postText.toLowerCase();
+
+  return (
+    townCandidates.find((town) => normalizedPost.includes(town.toLowerCase())) ??
+    townCandidates[0] ??
+    "Unknown"
+  );
+}
+
+function buildHelpfulReply(
+  input: LocalSignalAnalysisInput,
+  urgency: LocalSignalAnalysisOutput["urgency"],
+) {
+  const context =
+    urgency === "high"
+      ? "A quick check of airflow, the outdoor unit, and thermostat settings can help narrow it down."
+      : "It can help to note when it started and whether the system is cooling, heating, or making noise.";
+
+  return `Hey - sounds frustrating. ${context} ${input.company_name} is local and can help take a look if you still need someone. Happy to point you in the right direction either way.`;
+}
+
+function normalizeLocalSignalAnalysis(
+  analysis: LocalSignalAnalysisOutput,
+  input: LocalSignalAnalysisInput,
+): LocalSignalAnalysisOutput {
+  return {
+    ...analysis,
+    lead_score: clamp(Math.round(analysis.lead_score), 0, 100),
+    suggested_reply: enforceReplyRules(
+      analysis.suggested_reply,
+      input.company_name,
+    ),
+  };
+}
+
+function enforceReplyRules(reply: string, companyName: string) {
+  const withoutForbiddenClaims = reply
+    .replace(/\bI used them\b/gi, "")
+    .replace(/\bthey did work for me\b/gi, "")
+    .replace(/\bthey worked for me\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const limitedCompanyMentions = limitCompanyMention(
+    withoutForbiddenClaims,
+    companyName,
+  );
+  const words = limitedCompanyMentions.split(/\s+/);
+
+  return words.length <= 75 ? limitedCompanyMentions : words.slice(0, 75).join(" ");
+}
+
+function limitCompanyMention(reply: string, companyName: string) {
+  const firstIndex = reply.toLowerCase().indexOf(companyName.toLowerCase());
+
+  if (firstIndex === -1) {
+    return reply;
+  }
+
+  const beforeAndFirstMention = reply.slice(
+    0,
+    firstIndex + companyName.length,
+  );
+  const afterFirstMention = reply
+    .slice(firstIndex + companyName.length)
+    .replace(new RegExp(escapeRegExp(companyName), "gi"), "the company");
+
+  return `${beforeAndFirstMention}${afterFirstMention}`;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function placeholderReply(

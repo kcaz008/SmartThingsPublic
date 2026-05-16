@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { analyzeOpportunity, generateReplyDraft } from "@/lib/openai";
+import { createAiAnalysis } from "@/lib/openai";
 import { currentBusiness, getOpportunityById } from "@/lib/sample-data";
 
 export async function POST(request: Request) {
@@ -14,18 +14,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const input = {
-    title: opportunity.title,
-    postText: opportunity.postText,
-    neighborhood: opportunity.neighborhood,
-    sourceName: opportunity.sourceName,
-  };
-  const analysis = await analyzeOpportunity(input);
-  const reply = await generateReplyDraft(currentBusiness, input, analysis);
+  const analysis = await createAiAnalysis({
+    post_text: `${opportunity.title}\n\n${opportunity.postText}`,
+    source_name: opportunity.sourceName,
+    source_type: "manual",
+    service_area: currentBusiness.serviceArea,
+    company_name: currentBusiness.name,
+    company_phone: currentBusiness.phone,
+    tone_rules: currentBusiness.tone,
+  });
 
   return NextResponse.json({
     opportunityId,
-    reply,
+    ai_analysis: analysis,
+    reply: analysis.suggested_reply,
     autoPosted: false,
   });
 }

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Field, inputClassName } from "@/components/form-controls";
 import type { AiAnalysis, Source } from "@/lib/types";
+import type { LocalSignalAnalysisOutput } from "@/lib/openai";
 
 type IntakeResult = {
   analysis: AiAnalysis;
+  ai_analysis: LocalSignalAnalysisOutput;
   reply: string;
 };
 
@@ -23,13 +25,16 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
     const formData = new FormData(event.currentTarget);
     const payload = {
       title: String(formData.get("title") ?? ""),
-      postText: String(formData.get("postText") ?? ""),
+      post_text: String(formData.get("postText") ?? ""),
       authorName: String(formData.get("authorName") ?? ""),
       neighborhood: String(formData.get("neighborhood") ?? ""),
       sourceId: String(formData.get("sourceId") ?? ""),
       sourceName:
         sources.find((source) => source.id === formData.get("sourceId"))
           ?.name ?? "Manual intake",
+      source_type:
+        sources.find((source) => source.id === formData.get("sourceId"))
+          ?.type ?? "manual",
     };
 
     try {
@@ -144,13 +149,19 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
             Draft generated
           </p>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <ResultMetric label="Category" value={result.analysis.category} />
-            <ResultMetric label="Urgency" value={result.analysis.urgency} />
             <ResultMetric
-              label="Confidence"
-              value={`${Math.round(result.analysis.confidence * 100)}%`}
+              label="Service"
+              value={result.ai_analysis.service_type}
+            />
+            <ResultMetric label="Urgency" value={result.ai_analysis.urgency} />
+            <ResultMetric
+              label="Lead score"
+              value={String(result.ai_analysis.lead_score)}
             />
           </div>
+          <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+            {result.ai_analysis.reasoning_summary}
+          </p>
           <div className="mt-5 rounded-3xl bg-blue-50 p-5">
             <p className="text-sm font-bold text-blue-950">Reply draft</p>
             <p className="mt-2 text-base leading-8 text-slate-800">
