@@ -176,8 +176,8 @@ export default async function SourcesPage() {
                 ))
               ) : (
                 <p className="text-sm text-slate-500">
-                  Add keywords like "AC stopped", "furnace quote", or
-                  "thermostat blank".
+                  Add keywords like AC stopped, furnace quote, or thermostat
+                  blank.
                 </p>
               )}
               </div>
