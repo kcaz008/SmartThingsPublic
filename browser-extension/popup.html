@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LocalSignal Auto-Assist</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="logo">LS</div>
+        <div>
+          <h1>LocalSignal</h1>
+          <p>Button-activated Auto-Assist</p>
+        </div>
+      </section>
+
+      <label class="field">
+        <span>LocalSignal app URL</span>
+        <input id="apiBase" type="url" placeholder="http://localhost:3000" />
+      </label>
+
+      <button id="scanButton" class="primary-button" type="button">
+        Scan Current Page
+      </button>
+
+      <p id="status" class="status">
+        Open a Facebook group, then click scan. LocalSignal only reads visible
+        posts after this button is clicked.
+      </p>
+
+      <section class="rules" aria-label="Safety rules">
+        <span>No passwords</span>
+        <span>No background scraping</span>
+        <span>No auto-posting</span>
+      </section>
+
+      <section id="cards" class="cards" aria-live="polite"></section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

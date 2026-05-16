@@ -4,6 +4,7 @@ import { formatAutopilotMode } from "@/lib/format";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: "Command" },
+  { href: "/auto-assist", label: "Auto-Assist", icon: "Click" },
   { href: "/opportunities/new", label: "Add Opportunity", icon: "Plus" },
   { href: "/sources", label: "Sources", icon: "Radar" },
   { href: "/settings", label: "Settings", icon: "Gear" },
