@@ -10,6 +10,7 @@ const autopilotModes = new Set<AutopilotMode>([
   "off",
   "draft_only",
   "approval_required",
+  "post_when_connected",
 ]);
 
 export async function updateBusinessSettingsAction(formData: FormData) {

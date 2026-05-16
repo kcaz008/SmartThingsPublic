@@ -22,11 +22,14 @@ import { reviewReplyAction } from "./actions";
 
 export default async function OpportunityDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ demoAction?: string }>;
 }) {
   const authContext = await requireAuthContext();
   const { id } = await params;
+  const { demoAction } = await searchParams;
   const opportunity = await getOpportunity(authContext.businessId, id);
 
   if (!opportunity) {
@@ -82,6 +85,17 @@ export default async function OpportunityDetailPage({
           </Link>
         }
       />
+
+      {demoAction ? (
+        <div className="mb-6 rounded-3xl border border-blue-100 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
+          <p className="font-bold">Demo action received.</p>
+          <p className="mt-1">
+            The {demoAction} button is wired, but this preview has no Supabase
+            database, so it cannot persist changes. With Supabase configured,
+            this action updates the reply/opportunity record and audit log.
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_25rem]">
         <section className="space-y-6">
@@ -144,7 +158,9 @@ export default async function OpportunityDetailPage({
             {opportunity.postUrl ? (
               <a
                 href={opportunity.postUrl}
-                className="mt-5 inline-flex text-sm font-bold text-blue-700"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-bold text-blue-700 ring-1 ring-blue-100"
               >
                 Open original post
               </a>

@@ -14,7 +14,8 @@ create type public.opportunity_status as enum (
 create type public.autopilot_mode as enum (
   'off',
   'draft_only',
-  'approval_required'
+  'approval_required',
+  'post_when_connected'
 );
 
 create type public.source_type as enum (

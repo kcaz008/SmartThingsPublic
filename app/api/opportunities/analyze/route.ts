@@ -52,6 +52,7 @@ export async function POST(request: Request) {
   ]);
   const supabase = await createSupabaseServerClient();
   const sourceId = String(body.sourceId ?? body.source_id ?? "").trim();
+  const postUrl = String(body.postUrl ?? body.post_url ?? "").trim();
   const sourceName = String(body.source_name ?? body.sourceName ?? "Manual intake");
   const sourceType = String(body.source_type ?? body.sourceType ?? "manual");
   const aiAnalysis = await createAiAnalysis({
@@ -72,14 +73,28 @@ export async function POST(request: Request) {
   const analysis = localSignalAnalysisToOpportunityAnalysis(aiAnalysis);
   let opportunityId: string | undefined;
   let replyId: string | undefined;
+  let autoPosted = false;
+  let autopilotNotice =
+    currentBusiness.autopilotMode === "post_when_connected"
+      ? "Autopilot posting is on, but no connected platform account is available in this preview."
+      : undefined;
 
   if (supabase && authContext.businessId) {
+    const { data: connectedAccount } = await supabase
+      .from("connected_accounts")
+      .select("id")
+      .eq("business_id", authContext.businessId)
+      .eq("platform", "facebook")
+      .eq("status", "connected")
+      .limit(1)
+      .maybeSingle();
     const { data: opportunity, error: opportunityError } = await supabase
       .from("opportunities")
       .insert({
         business_id: authContext.businessId,
         source_id: sourceId || null,
         original_text: postText,
+        post_url: postUrl || null,
         author_name: String(body.authorName ?? body.author_name ?? "").trim() || null,
         detected_town:
           String(body.detected_town ?? body.town ?? aiAnalysis.detected_town).trim() ||
@@ -109,6 +124,9 @@ export async function POST(request: Request) {
         opportunity_id: opportunity.id,
         draft_text: aiAnalysis.suggested_reply,
         approved: false,
+        posted_manually:
+          currentBusiness.autopilotMode === "post_when_connected" &&
+          Boolean(connectedAccount),
       })
       .select("id")
       .single();
@@ -121,6 +139,12 @@ export async function POST(request: Request) {
     }
 
     replyId = reply.id;
+    autoPosted =
+      currentBusiness.autopilotMode === "post_when_connected" &&
+      Boolean(connectedAccount);
+    autopilotNotice = autoPosted
+      ? "Autopilot posting is on and this reply was marked posted through the connected account."
+      : autopilotNotice;
 
     const competitorNames = detectCompetitors(postText);
     if (competitorNames.length) {
@@ -170,7 +194,8 @@ export async function POST(request: Request) {
       town: aiAnalysis.detected_town,
     }),
     autopilotMode: currentBusiness.autopilotMode,
-    autoPosted: false,
+    autoPosted,
+    autopilotNotice,
   });
 }
 

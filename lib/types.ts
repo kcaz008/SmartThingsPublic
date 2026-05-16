@@ -15,6 +15,7 @@ export const autopilotModes = [
   "off",
   "draft_only",
   "approval_required",
+  "post_when_connected",
 ] as const;
 
 export type AutopilotMode = (typeof autopilotModes)[number];

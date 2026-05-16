@@ -12,6 +12,8 @@ type IntakeResult = {
   ai_analysis: LocalSignalAnalysisOutput;
   reply: string;
   replyOptions?: ReplyVariant[];
+  autopilotNotice?: string;
+  autoPosted?: boolean;
   opportunityId?: string;
 };
 
@@ -32,6 +34,7 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
       post_text: String(formData.get("postText") ?? ""),
       authorName: String(formData.get("authorName") ?? ""),
       detected_town: String(formData.get("town") ?? ""),
+      postUrl: String(formData.get("postUrl") ?? ""),
       sourceId: String(formData.get("sourceId") ?? ""),
       source_name:
         sources.find((source) => source.id === formData.get("sourceId"))
@@ -109,6 +112,15 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
               placeholder="Maple Grove"
             />
           </Field>
+
+          <Field label="Original post URL" hint="Optional direct link">
+            <input
+              name="postUrl"
+              type="url"
+              className={inputClassName}
+              placeholder="https://facebook.com/groups/.../posts/..."
+            />
+          </Field>
         </div>
 
         <div className="mt-5">
@@ -170,6 +182,11 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
           <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             {result.ai_analysis.reasoning_summary}
           </p>
+          {result.autopilotNotice ? (
+            <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
+              {result.autopilotNotice}
+            </p>
+          ) : null}
           {result.replyOptions?.length ? (
             <>
               <p className="mt-5 text-sm font-bold uppercase tracking-[0.18em] text-slate-400">

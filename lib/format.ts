@@ -19,6 +19,7 @@ const autopilotLabels: Record<AutopilotMode, string> = {
   off: "Off",
   draft_only: "Draft only",
   approval_required: "Approval required",
+  post_when_connected: "Auto-post when connected",
 };
 
 const urgencyLabels: Record<UrgencyLevel, string> = {

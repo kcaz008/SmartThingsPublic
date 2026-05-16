@@ -81,6 +81,11 @@ export default async function SettingsPage() {
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  Posting mode only posts when an official platform connection
+                  is active. Without Meta/Facebook OAuth it stays in safe demo
+                  mode and creates drafts only.
+                </p>
               </Field>
             </div>
           </section>

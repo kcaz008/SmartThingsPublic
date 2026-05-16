@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
 import { createSupabaseServerClient } from "@/lib/supabase";
@@ -9,14 +10,17 @@ export async function reviewReplyAction(formData: FormData) {
   const authContext = await requireAuthContext();
   const supabase = await createSupabaseServerClient();
 
-  if (!supabase || !authContext.businessId) {
-    return;
-  }
-
   const opportunityId = String(formData.get("opportunityId") ?? "");
   const replyId = String(formData.get("replyId") ?? "");
   const action = String(formData.get("action") ?? "");
   const draftText = String(formData.get("draftText") ?? "").trim();
+
+  if (!supabase || !authContext.businessId) {
+    if (opportunityId) {
+      redirect(`/opportunities/${opportunityId}?demoAction=${action || "save"}`);
+    }
+    return;
+  }
 
   if (!opportunityId || !replyId || !draftText) {
     return;

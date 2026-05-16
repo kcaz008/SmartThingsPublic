@@ -16,7 +16,7 @@ export const currentBusiness: Business = {
     "Helpful Long Island HVAC pro, neighborly, specific, never pushy.",
   phone: "(516) 777-0242",
   website: "https://atlanticclimatesystems.example",
-  autopilotMode: "draft_only",
+  autopilotMode: "post_when_connected",
   servicesOffered:
     "AC repair, heating repair, furnace service, boiler service, heat pumps, mini-splits, indoor air quality, maintenance, installations.",
   emergencyAvailability:
