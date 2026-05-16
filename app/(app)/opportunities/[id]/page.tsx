@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyReplyButton } from "@/components/copy-reply-button";
 import { PageHeader } from "@/components/page-header";
+import { ReplyVariantOptions } from "@/components/reply-variant-options";
 import { PlainBadge, StatusBadge, UrgencyBadge } from "@/components/status-badge";
 import { requireAuthContext } from "@/lib/auth";
 import {
+  getBusiness,
   getOpportunity,
   getReplyForOpportunity,
   getSource,
@@ -15,6 +17,7 @@ import {
 } from "@/lib/data";
 import { formatDateTime, summarizeText } from "@/lib/format";
 import { deriveLeadIntelligence } from "@/lib/lead-intelligence";
+import { buildReplyVariants } from "@/lib/reply-variants";
 import { reviewReplyAction } from "./actions";
 
 export default async function OpportunityDetailPage({
@@ -37,6 +40,7 @@ export default async function OpportunityDetailPage({
     replyHistory,
     reputationMemories,
     competitorMentions,
+    business,
   ] = await Promise.all([
     getReplyForOpportunity(authContext.businessId, opportunity.id),
     getSource(authContext.businessId, opportunity.sourceId),
@@ -44,6 +48,7 @@ export default async function OpportunityDetailPage({
     listFacebookReplyHistory(authContext.businessId),
     listReputationMemories(authContext.businessId),
     listCompetitorMentions(authContext.businessId),
+    getBusiness(authContext.businessId),
   ]);
   const intelligence = deriveLeadIntelligence({
     opportunity,
@@ -53,6 +58,13 @@ export default async function OpportunityDetailPage({
     replyHistory,
     reputationMemories,
     competitorMentions,
+  });
+  const replyOptions = buildReplyVariants({
+    companyName: business.name,
+    phone: business.phone,
+    serviceType: opportunity.serviceType,
+    urgency: opportunity.urgency,
+    town: opportunity.detectedTown,
   });
 
   return (
@@ -154,42 +166,49 @@ export default async function OpportunityDetailPage({
               ) : null}
             </div>
             {reply ? (
-              <form action={reviewReplyAction} className="mt-5 space-y-4">
-                <input type="hidden" name="opportunityId" value={opportunity.id} />
-                <input type="hidden" name="replyId" value={reply.id} />
-                <textarea
-                  name="draftText"
-                  rows={6}
-                  defaultValue={reply.draftText}
-                  className="w-full rounded-3xl border border-blue-100 bg-blue-50 p-5 text-base leading-8 text-slate-800 outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
-                />
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="submit"
-                    name="action"
-                    value="approve"
-                    className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white"
-                  >
-                    Approve draft
-                  </button>
-                  <button
-                    type="submit"
-                    name="action"
-                    value="save"
-                    className="rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white"
-                  >
-                    Save edit
-                  </button>
-                  <button
-                    type="submit"
-                    name="action"
-                    value="reject"
-                    className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200"
-                  >
-                    Reject
-                  </button>
-                </div>
-              </form>
+              <>
+                <ReplyVariantOptions variants={replyOptions} />
+                <form action={reviewReplyAction} className="mt-5 space-y-4">
+                  <input
+                    type="hidden"
+                    name="opportunityId"
+                    value={opportunity.id}
+                  />
+                  <input type="hidden" name="replyId" value={reply.id} />
+                  <textarea
+                    name="draftText"
+                    rows={6}
+                    defaultValue={reply.draftText}
+                    className="w-full rounded-3xl border border-blue-100 bg-blue-50 p-5 text-base leading-8 text-slate-800 outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                  />
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      name="action"
+                      value="approve"
+                      className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white"
+                    >
+                      Approve draft
+                    </button>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="save"
+                      className="rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white"
+                    >
+                      Save edit
+                    </button>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="reject"
+                      className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </form>
+              </>
             ) : (
               <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
                 No draft yet. Use autopilot or generate a draft after review.

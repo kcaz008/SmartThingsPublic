@@ -8,6 +8,7 @@ import {
   localSignalAnalysisToOpportunityAnalysis,
 } from "@/lib/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { buildReplyVariants } from "@/lib/reply-variants";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export async function POST(request: Request) {
@@ -161,6 +162,13 @@ export async function POST(request: Request) {
     analysis,
     ai_analysis: aiAnalysis,
     reply: aiAnalysis.suggested_reply,
+    replyOptions: buildReplyVariants({
+      companyName: currentBusiness.name,
+      phone: currentBusiness.phone,
+      serviceType: aiAnalysis.service_type,
+      urgency: aiAnalysis.urgency,
+      town: aiAnalysis.detected_town,
+    }),
     autopilotMode: currentBusiness.autopilotMode,
     autoPosted: false,
   });

@@ -10,6 +10,7 @@ import {
 } from "@/lib/data";
 import { createAiAnalysis } from "@/lib/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { buildReplyVariants } from "@/lib/reply-variants";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export async function POST(request: Request) {
@@ -109,6 +110,13 @@ export async function POST(request: Request) {
     replyId,
     ai_analysis: analysis,
     reply: analysis.suggested_reply,
+    replyOptions: buildReplyVariants({
+      companyName: currentBusiness.name,
+      phone: currentBusiness.phone,
+      serviceType: analysis.service_type,
+      urgency: analysis.urgency,
+      town: analysis.detected_town,
+    }),
     autoPosted: false,
   });
 }

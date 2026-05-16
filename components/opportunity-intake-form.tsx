@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Field, inputClassName } from "@/components/form-controls";
+import { ReplyVariantOptions } from "@/components/reply-variant-options";
 import type { AiAnalysis, Source } from "@/lib/types";
 import type { LocalSignalAnalysisOutput } from "@/lib/openai";
+import type { ReplyVariant } from "@/lib/reply-variants";
 
 type IntakeResult = {
   analysis: AiAnalysis;
   ai_analysis: LocalSignalAnalysisOutput;
   reply: string;
+  replyOptions?: ReplyVariant[];
   opportunityId?: string;
 };
 
@@ -167,12 +170,21 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
           <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             {result.ai_analysis.reasoning_summary}
           </p>
-          <div className="mt-5 rounded-3xl bg-blue-50 p-5">
-            <p className="text-sm font-bold text-blue-950">Reply draft</p>
-            <p className="mt-2 text-base leading-8 text-slate-800">
-              {result.reply}
-            </p>
-          </div>
+          {result.replyOptions?.length ? (
+            <>
+              <p className="mt-5 text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+                Three AI reply options
+              </p>
+              <ReplyVariantOptions variants={result.replyOptions} />
+            </>
+          ) : (
+            <div className="mt-5 rounded-3xl bg-blue-50 p-5">
+              <p className="text-sm font-bold text-blue-950">Reply draft</p>
+              <p className="mt-2 text-base leading-8 text-slate-800">
+                {result.reply}
+              </p>
+            </div>
+          )}
           {result.opportunityId ? (
             <a
               href={`/opportunities/${result.opportunityId}`}
