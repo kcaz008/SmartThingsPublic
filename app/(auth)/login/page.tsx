@@ -7,6 +7,10 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const { error } = await searchParams;
+  const demoMode =
+    process.env.NODE_ENV !== "production" &&
+    (!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   return (
     <section className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
@@ -25,6 +29,22 @@ export default async function LoginPage({
       {error ? (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
           {error}
+        </div>
+      ) : null}
+
+      {demoMode ? (
+        <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+          <p className="font-bold">Demo mode is available.</p>
+          <p className="mt-1">
+            Supabase is not configured in this preview, so real signup/login is
+            disabled. You can still open the dashboard with sample data.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-3 inline-flex rounded-xl bg-signal-blue px-4 py-2 text-xs font-bold text-white"
+          >
+            Continue with demo data
+          </Link>
         </div>
       ) : null}
 

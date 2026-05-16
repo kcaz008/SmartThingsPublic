@@ -7,6 +7,11 @@ export default async function SignupPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const demoMode =
+    process.env.NODE_ENV !== "production" &&
+    (!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      !process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   return (
     <section className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl">
@@ -26,6 +31,22 @@ export default async function SignupPage({
       {error ? (
         <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
           {error}
+        </div>
+      ) : null}
+
+      {demoMode ? (
+        <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+          <p className="font-bold">Signup needs Supabase.</p>
+          <p className="mt-1">
+            This preview does not have `SUPABASE_SERVICE_ROLE_KEY`, so real
+            account creation is disabled. Use demo mode to view the app now.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-3 inline-flex rounded-xl bg-signal-blue px-4 py-2 text-xs font-bold text-white"
+          >
+            Continue with demo data
+          </Link>
         </div>
       ) : null}
 

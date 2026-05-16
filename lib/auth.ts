@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { currentBusiness, currentUser } from "@/lib/sample-data";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 export type AppRole = "owner" | "admin" | "dispatcher" | "technician";
@@ -15,7 +16,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
-    return null;
+    return getDemoAuthContext();
   }
 
   const {
@@ -37,6 +38,39 @@ export async function getAuthContext(): Promise<AuthContext | null> {
       typeof user.user_metadata?.full_name === "string"
         ? user.user_metadata.full_name
         : user.email ?? "LocalSignal user",
+  };
+}
+
+export function isDemoAuthEnabled() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    (!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  );
+}
+
+function getDemoAuthContext(): AuthContext | null {
+  if (!isDemoAuthEnabled()) {
+    return null;
+  }
+
+  return {
+    user: {
+      id: currentUser.id,
+      aud: "authenticated",
+      email: currentUser.email,
+      app_metadata: {
+        business_id: currentBusiness.id,
+        role: currentUser.role,
+      },
+      user_metadata: {
+        full_name: currentUser.fullName,
+      },
+      created_at: new Date().toISOString(),
+    } as User,
+    businessId: currentBusiness.id,
+    role: currentUser.role,
+    fullName: currentUser.fullName,
   };
 }
 

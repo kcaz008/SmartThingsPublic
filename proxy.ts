@@ -5,6 +5,14 @@ const protectedPathPattern =
   /^\/(dashboard|opportunities|sources|settings)(?:\/|$)/;
 const protectedApiPattern = /^\/api\/(opportunities|replies)(?:\/|$)/;
 
+function isDemoAuthEnabled() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    (!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  );
+}
+
 export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -17,6 +25,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    if (isDemoAuthEnabled()) {
+      return NextResponse.next();
+    }
+
     if (protectedApiPattern.test(request.nextUrl.pathname)) {
       return NextResponse.json(
         { error: "Supabase environment variables are missing" },
