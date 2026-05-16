@@ -183,6 +183,44 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      <section className="mt-6 rounded-3xl border border-blue-100 bg-signal-sky p-5">
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-900">
+          Demo workflow examples
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <DemoLink
+            href="/opportunities/opp_ac_not_cooling"
+            title="Rob replied first; Maria should follow"
+            helper="Competitor commented after our first company reply."
+          />
+          <DemoLink
+            href="/opportunities/opp_second_opinion"
+            title="Avery copied but did not post"
+            helper="Shows copied draft, no posted confirmation."
+          />
+          <DemoLink
+            href="/opportunities/opp_booked_tuneup"
+            title="No more company comments"
+            helper="Customer asked companies to stop replying."
+          />
+          <DemoLink
+            href="/opportunities/opp_wrong_brand"
+            title="Wrong-brand risk"
+            helper="Lead mentions Harbor Home while Atlantic is active."
+          />
+          <DemoLink
+            href="/opportunities/opp_hostile_thread"
+            title="Promo-sensitive group"
+            helper="Massapequa group should be DM-first."
+          />
+          <DemoLink
+            href="/opportunities/opp_phone_repeat"
+            title="Phone already posted"
+            helper="Next draft avoids repeating the phone number."
+          />
+        </div>
+      </section>
+
       <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_22rem]">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -276,6 +314,26 @@ function CoordinationCard({
       <p className="mt-3 text-3xl font-black text-slate-950">{value}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{helper}</p>
     </div>
+  );
+}
+
+function DemoLink({
+  href,
+  title,
+  helper,
+}: {
+  href: string;
+  title: string;
+  helper: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
+    >
+      <p className="font-black text-blue-950">{title}</p>
+      <p className="mt-2 leading-6 text-blue-900/75">{helper}</p>
+    </Link>
   );
 }
 

@@ -4,6 +4,7 @@ import {
   aiReplies as sampleReplies,
   businesses as sampleBusinesses,
   competitorMentions as sampleCompetitorMentions,
+  facebookReplyHistory as sampleFacebookReplyHistory,
   currentBusiness as sampleBusiness,
   opportunities as sampleOpportunities,
   sources as sampleSources,
@@ -461,7 +462,9 @@ export async function listFacebookReplyHistory(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return [] satisfies FacebookReplyHistory[];
+    return sampleFacebookReplyHistory.filter(
+      (history) => history.businessId === businessId,
+    );
   }
 
   const { data, error } = await supabase

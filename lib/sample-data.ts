@@ -2,6 +2,7 @@ import type {
   AiReply,
   Business,
   CompetitorMention,
+  FacebookReplyHistory,
   Opportunity,
   Source,
   TeamMember,
@@ -245,6 +246,39 @@ export const opportunities: Opportunity[] = [
     status: "new",
     createdAt: "2026-05-16T12:20:00Z",
   },
+  {
+    id: "opp_wrong_brand",
+    businessId: currentBusiness.id,
+    sourceId: "src_garden_city_fb",
+    authorName: "Nina W.",
+    detectedTown: "Great Neck",
+    serviceType: "HVAC Maintenance",
+    urgency: "medium",
+    leadScore: 74,
+    sentiment: "neutral",
+    intentType: "recommendation_request",
+    originalText:
+      "Does anyone have the number for Harbor Home Services? I think they did our neighbor's maintenance last year, but I may have the name wrong.",
+    status: "new",
+    createdAt: "2026-05-16T13:05:00Z",
+  },
+  {
+    id: "opp_phone_repeat",
+    businessId: currentBusiness.id,
+    sourceId: "src_huntington_fb",
+    postUrl: "https://facebook.com/groups/huntington-homeowners/posts/7711",
+    authorName: "Evan C.",
+    detectedTown: "Huntington",
+    serviceType: "HVAC Repair",
+    urgency: "high",
+    leadScore: 89,
+    sentiment: "stressed",
+    intentType: "urgent_repair",
+    originalText:
+      "AC is freezing over again. Someone already posted Atlantic's number (516) 777-0242 above. Any quick advice before I call?",
+    status: "drafted",
+    createdAt: "2026-05-16T13:40:00Z",
+  },
 ];
 
 export const aiReplies: AiReply[] = [
@@ -267,6 +301,43 @@ export const aiReplies: AiReply[] = [
     createdAt: "2026-05-15T22:14:00Z",
     draftText:
       "Hi Daniel - a second opinion before a full replacement is smart. Atlantic Climate Systems can review what was quoted, look at the system, and explain what seems necessary versus optional without pressure.",
+  },
+  {
+    id: "reply_phone_repeat",
+    opportunityId: "opp_phone_repeat",
+    approved: false,
+    copied: false,
+    postedManually: false,
+    createdAt: "2026-05-16T13:41:00Z",
+    draftText:
+      "If it is freezing over again, shut it down long enough to thaw and check airflow at the filter/return. Repeated icing usually needs a real diagnosis.",
+  },
+];
+
+export const facebookReplyHistory: FacebookReplyHistory[] = [
+  {
+    id: "hist_rob_company_first",
+    businessId: currentBusiness.id,
+    manualPostId: "manual_opp_ac_not_cooling",
+    teamMemberId: "tm_rob",
+    aiReplyId: "reply_ac_not_cooling",
+    responseText:
+      "Atlantic Climate Systems can help take a look if you still need someone.",
+    commentsAgo: 3,
+    respondedAt: "2026-05-16T04:07:00Z",
+    createdAt: "2026-05-16T04:07:00Z",
+  },
+  {
+    id: "hist_avery_copied_not_posted",
+    businessId: currentBusiness.id,
+    manualPostId: "manual_opp_second_opinion",
+    teamMemberId: "tm_avery",
+    aiReplyId: "reply_second_opinion",
+    responseText:
+      "Avery copied the second-opinion draft but did not mark it posted.",
+    commentsAgo: 0,
+    respondedAt: "2026-05-15T22:16:00Z",
+    createdAt: "2026-05-15T22:16:00Z",
   },
 ];
 

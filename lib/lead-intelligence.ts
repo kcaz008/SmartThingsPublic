@@ -37,6 +37,8 @@ export type LeadIntelligence = {
   embarrassmentWarnings: string[];
   collisionWarnings: string[];
   safetyLabel: CoordinationLabel;
+  wrongBrandRisk: boolean;
+  phoneAlreadyPosted: boolean;
   secondResponderRecommended: boolean;
   firstResponder: string;
   recommendedSecondResponder: string;
@@ -87,6 +89,9 @@ export function deriveLeadIntelligence({
 }): LeadIntelligence {
   const text = opportunity.originalText;
   const textLower = text.toLowerCase();
+  const wrongBrandRisk = /harbor home services|harbor home/i.test(text);
+  const phoneAlreadyPosted =
+    textLower.includes("516-777-0242") || textLower.includes("(516) 777-0242");
   const relevantCompetitors = competitorMentions.filter(
     (mention) =>
       mention.opportunityId === opportunity.id ||
@@ -138,10 +143,17 @@ export function deriveLeadIntelligence({
     phoneUnsafe ? "Phone number is not safe in public comments for this group." : "",
     dmPreferred ? "This group is better handled DM-first." : "",
   ].filter(Boolean);
+  const matchingReplyHistory = replyHistory.find(
+    (history) => history.aiReplyId && history.aiReplyId === reply?.id,
+  );
+  const matchingResponder = teamMembers.find(
+    (member) => member.id === matchingReplyHistory?.teamMemberId,
+  );
   const firstResponder =
-    reply?.copied || ["approved", "replied", "booked", "won"].includes(opportunity.status)
+    matchingResponder?.fullName ??
+    (reply?.copied || ["approved", "replied", "booked", "won"].includes(opportunity.status)
       ? teamMembers[0]?.fullName ?? "A team member"
-      : "None yet";
+      : "None yet");
   const recommendedSecondResponder =
     teamMembers.find((member) => member.fullName !== firstResponder && member.role === "dispatcher")
       ?.fullName ??
@@ -172,9 +184,7 @@ export function deriveLeadIntelligence({
     textLower.includes("same reply") || textLower.includes("copy paste")
       ? "A repetitive reply may be noticed."
       : "",
-    textLower.includes("516-777-0242") || textLower.includes("(516) 777-0242")
-      ? "Phone number was already posted recently."
-      : "",
+    phoneAlreadyPosted ? "Phone number was already posted recently." : "",
     source?.bestReplyStyle === "personal"
       ? "A personal/team-member reply may feel safer than another company reply."
       : "",
@@ -186,6 +196,9 @@ export function deriveLeadIntelligence({
       : "",
     /no more company comments|please no more|stop commenting/i.test(text)
       ? "Customer asked not to receive more company comments."
+      : "",
+    wrongBrandRisk
+      ? "Wrong-brand risk: this lead mentions Harbor Home Services while Atlantic Climate Systems is selected."
       : "",
   ].filter(Boolean);
   const bestResponder = chooseBestResponder({
@@ -223,12 +236,15 @@ export function deriveLeadIntelligence({
     adminRiskWarnings,
     embarrassmentWarnings,
     collisionWarnings,
+    wrongBrandRisk,
+    phoneAlreadyPosted,
     safetyLabel: chooseSafetyLabel({
       opportunity,
       secondResponderRecommended,
       adminRiskWarnings,
       embarrassmentWarnings,
       collisionWarnings,
+      wrongBrandRisk,
       dmPreferred,
     }),
     secondResponderRecommended,
@@ -298,7 +314,9 @@ export function buildLeadAnalytics({
       (opportunity) =>
         (intelligenceById.get(opportunity.id)?.collisionWarnings.length ?? 0) > 0,
     ).length,
-    wrongBrandRisk: 0,
+    wrongBrandRisk: opportunities.filter(
+      (opportunity) => intelligenceById.get(opportunity.id)?.wrongBrandRisk,
+    ).length,
     dmRecommended: opportunities.filter(
       (opportunity) =>
         intelligenceById.get(opportunity.id)?.safetyLabel === "DM only",
@@ -430,6 +448,7 @@ function chooseSafetyLabel({
   adminRiskWarnings,
   embarrassmentWarnings,
   collisionWarnings,
+  wrongBrandRisk,
   dmPreferred,
 }: {
   opportunity: Opportunity;
@@ -437,8 +456,13 @@ function chooseSafetyLabel({
   adminRiskWarnings: string[];
   embarrassmentWarnings: string[];
   collisionWarnings: string[];
+  wrongBrandRisk: boolean;
   dmPreferred?: boolean;
 }): CoordinationLabel {
+  if (wrongBrandRisk) {
+    return "Avoid replying";
+  }
+
   if (["booked", "won", "lost", "ignored"].includes(opportunity.status)) {
     return "Already handled";
   }

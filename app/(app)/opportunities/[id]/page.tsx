@@ -70,7 +70,8 @@ export default async function OpportunityDetailPage({
     town: opportunity.detectedTown,
     secondResponderName: intelligence.recommendedSecondResponder,
     ctaPhoneRule: business.ctaPhoneRule,
-    phoneSafeInPublic: source?.phoneSafeInPublic,
+    phoneSafeInPublic:
+      source?.phoneSafeInPublic && !intelligence.phoneAlreadyPosted,
   });
   const timeline = buildTimeline({
     opportunity,
@@ -283,9 +284,21 @@ export default async function OpportunityDetailPage({
             {intelligence.secondResponderRecommended ? (
               <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm leading-6 text-blue-900">
                 <p className="font-bold">Second responder recommended</p>
-                <p className="mt-1">First: {intelligence.firstResponder}</p>
-                <p>Next: {intelligence.recommendedSecondResponder}</p>
+                <p className="mt-1">{`First: ${intelligence.firstResponder}`}</p>
+                <p>{`Next: ${intelligence.recommendedSecondResponder}`}</p>
                 <p className="mt-1">{intelligence.secondResponderReason}</p>
+              </div>
+            ) : null}
+            {intelligence.wrongBrandRisk ? (
+              <div className="mt-4 rounded-2xl bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+                Wrong-brand risk: switch clients or avoid replying until this
+                lead is assigned to the right brand.
+              </div>
+            ) : null}
+            {intelligence.phoneAlreadyPosted ? (
+              <div className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
+                Phone number was already posted recently. Reply options avoid
+                repeating it in public.
               </div>
             ) : null}
           </div>
@@ -487,7 +500,9 @@ function buildTimeline({
       ? [
           {
             time: formatDateTime(reply.createdAt),
-            text: `${intelligence.firstResponder} replied or copied a public draft.`,
+            text: reply.postedManually
+              ? `${intelligence.firstResponder} replied publicly.`
+              : `${intelligence.firstResponder} copied a draft but did not mark it posted.`,
           },
         ]
       : []),
