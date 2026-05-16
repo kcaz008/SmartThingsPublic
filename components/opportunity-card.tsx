@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { formatDateTime, summarizeText } from "@/lib/format";
-import { getSourceById } from "@/lib/sample-data";
-import type { Opportunity } from "@/lib/types";
+import type { Opportunity, Source } from "@/lib/types";
 import { PlainBadge, StatusBadge, UrgencyBadge } from "@/components/status-badge";
 
 export function OpportunityCard({
   opportunity,
+  source,
 }: {
   opportunity: Opportunity;
+  source?: Source;
 }) {
-  const source = getSourceById(opportunity.sourceId);
-
   return (
     <Link
       href={`/opportunities/${opportunity.id}`}

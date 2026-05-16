@@ -41,7 +41,7 @@ export type User = {
   businessId: string;
   email: string;
   fullName: string;
-  role: "owner" | "dispatcher" | "technician";
+  role: "owner" | "admin" | "dispatcher" | "technician";
 };
 
 export type Business = {
@@ -52,6 +52,35 @@ export type Business = {
   phone: string;
   website: string;
   autopilotMode: AutopilotMode;
+};
+
+export type TargetKeyword = {
+  id: string;
+  businessId: string;
+  keyword: string;
+  createdAt: string;
+};
+
+export type ConnectedAccount = {
+  id: string;
+  businessId: string;
+  provider: SourceType;
+  displayName: string;
+  status: "not_connected" | "pending_oauth" | "connected" | "error";
+  notes?: string;
+  createdAt: string;
+  lastConnectedAt?: string;
+};
+
+export type AuditLog = {
+  id: string;
+  businessId: string;
+  userId?: string;
+  action: string;
+  targetTable?: string;
+  targetId?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
 };
 
 export type Source = {

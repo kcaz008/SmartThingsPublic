@@ -1,9 +1,16 @@
 import { OpportunityIntakeForm } from "@/components/opportunity-intake-form";
 import { PageHeader } from "@/components/page-header";
-import { currentBusiness, sources } from "@/lib/sample-data";
 import { formatAutopilotMode } from "@/lib/format";
+import { requireAuthContext } from "@/lib/auth";
+import { getBusiness, listSources } from "@/lib/data";
 
-export default function AddOpportunityPage() {
+export default async function AddOpportunityPage() {
+  const authContext = await requireAuthContext();
+  const [currentBusiness, sources] = await Promise.all([
+    getBusiness(authContext.businessId),
+    listSources(authContext.businessId),
+  ]);
+
   return (
     <>
       <PageHeader

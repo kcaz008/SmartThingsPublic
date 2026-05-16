@@ -1,15 +1,21 @@
 import Link from "next/link";
-import { currentBusiness } from "@/lib/sample-data";
 import { formatAutopilotMode } from "@/lib/format";
+import { logoutAction } from "@/lib/auth-actions";
+import { getBusiness } from "@/lib/data";
+import { requireAuthContext } from "@/lib/auth";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: "Command" },
   { href: "/opportunities/new", label: "Add Opportunity", icon: "Plus" },
   { href: "/sources", label: "Sources", icon: "Radar" },
   { href: "/settings", label: "Settings", icon: "Gear" },
+  { href: "/settings/connected-accounts", label: "Connections", icon: "Link" },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export async function AppShell({ children }: { children: React.ReactNode }) {
+  const authContext = await requireAuthContext();
+  const currentBusiness = await getBusiness(authContext.businessId);
+
   return (
     <div className="min-h-screen lg:flex">
       <aside className="border-b border-slate-200 bg-signal-navy text-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-72 lg:border-b-0">
@@ -53,6 +59,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="mt-4 rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-signal-navy">
                 Autopilot:{" "}
                 {formatAutopilotMode(currentBusiness.autopilotMode)}
+              </div>
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <p className="text-sm font-semibold text-white">
+                  {authContext.fullName}
+                </p>
+                <p className="text-xs capitalize text-slate-300">
+                  {authContext.role}
+                </p>
+                <form action={logoutAction} className="mt-3">
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20"
+                  >
+                    Log out
+                  </button>
+                </form>
               </div>
             </div>
           </div>

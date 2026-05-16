@@ -3,9 +3,15 @@ import { FilterChip } from "@/components/filter-chip";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { opportunities, sources } from "@/lib/sample-data";
+import { requireAuthContext } from "@/lib/auth";
+import { listOpportunities, listSources } from "@/lib/data";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const authContext = await requireAuthContext();
+  const [opportunities, sources] = await Promise.all([
+    listOpportunities(authContext.businessId),
+    listSources(authContext.businessId),
+  ]);
   const activeOpportunities = opportunities.filter(
     (opportunity) => !["won", "lost", "ignored"].includes(opportunity.status),
   );
@@ -79,6 +85,7 @@ export default function DashboardPage() {
               <OpportunityCard
                 key={opportunity.id}
                 opportunity={opportunity}
+                source={sources.find((source) => source.id === opportunity.sourceId)}
               />
             ))}
           </div>
@@ -97,8 +104,8 @@ export default function DashboardPage() {
               helpful neighbor, not a bot or billboard.
             </p>
             <div className="mt-5 rounded-2xl bg-signal-mint p-4 text-sm font-semibold text-emerald-900">
-              Autopilot is set to draft only. No posts are published
-              automatically.
+              Manual approval is the default. LocalSignal drafts replies but
+              does not publish posts automatically.
             </div>
           </div>
 

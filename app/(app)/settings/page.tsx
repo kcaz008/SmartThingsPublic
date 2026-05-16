@@ -1,10 +1,20 @@
 import { Field, inputClassName } from "@/components/form-controls";
 import { PageHeader } from "@/components/page-header";
-import { currentBusiness, currentUser } from "@/lib/sample-data";
 import { autopilotModes } from "@/lib/types";
 import { formatAutopilotMode } from "@/lib/format";
+import { canManageBusiness, requireAuthContext } from "@/lib/auth";
+import { getBusiness, listAuditLogs } from "@/lib/data";
+import { updateBusinessSettingsAction } from "./actions";
+import Link from "next/link";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const authContext = await requireAuthContext();
+  const [currentBusiness, auditLogs] = await Promise.all([
+    getBusiness(authContext.businessId),
+    listAuditLogs(authContext.businessId, 8),
+  ]);
+  const canEdit = canManageBusiness(authContext.role);
+
   return (
     <>
       <PageHeader
@@ -14,7 +24,10 @@ export default function SettingsPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
-        <form className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+        <form
+          action={updateBusinessSettingsAction}
+          className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-soft"
+        >
           <section>
             <h2 className="text-xl font-black text-slate-950">
               Business profile
@@ -22,6 +35,8 @@ export default function SettingsPage() {
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               <Field label="Business name">
                 <input
+                  name="name"
+                  disabled={!canEdit}
                   className={inputClassName}
                   defaultValue={currentBusiness.name}
                 />
@@ -31,24 +46,32 @@ export default function SettingsPage() {
               </Field>
               <Field label="Service area">
                 <input
+                  name="serviceArea"
+                  disabled={!canEdit}
                   className={inputClassName}
                   defaultValue={currentBusiness.serviceArea}
                 />
               </Field>
               <Field label="Phone">
                 <input
+                  name="phone"
+                  disabled={!canEdit}
                   className={inputClassName}
                   defaultValue={currentBusiness.phone}
                 />
               </Field>
               <Field label="Website">
                 <input
+                  name="website"
+                  disabled={!canEdit}
                   className={inputClassName}
                   defaultValue={currentBusiness.website}
                 />
               </Field>
               <Field label="Autopilot mode">
                 <select
+                  name="autopilotMode"
+                  disabled={!canEdit}
                   className={inputClassName}
                   defaultValue={currentBusiness.autopilotMode}
                 >
@@ -68,6 +91,8 @@ export default function SettingsPage() {
               hint="Used by OpenAI when draft generation is enabled"
             >
               <textarea
+                name="toneRules"
+                disabled={!canEdit}
                 rows={5}
                 className={inputClassName}
                 defaultValue={currentBusiness.toneRules}
@@ -76,10 +101,11 @@ export default function SettingsPage() {
           </section>
 
           <button
-            type="button"
+            type="submit"
+            disabled={!canEdit}
             className="rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20"
           >
-            Save settings
+            {canEdit ? "Save settings" : "Owner/admin required"}
           </button>
         </form>
 
@@ -89,12 +115,30 @@ export default function SettingsPage() {
               Signed in user
             </p>
             <h2 className="mt-3 text-xl font-black text-slate-950">
-              {currentUser.fullName}
+              {authContext.fullName}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">{currentUser.email}</p>
-            <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold capitalize text-slate-700">
-              Role: {currentUser.role}
+            <p className="mt-1 text-sm text-slate-500">
+              {authContext.user.email}
             </p>
+            <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold capitalize text-slate-700">
+              Role: {authContext.role}
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Connected accounts
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Store safe account status only. Use official OAuth/API flows
+              before connecting platforms like Facebook.
+            </p>
+            <Link
+              href="/settings/connected-accounts"
+              className="mt-4 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+            >
+              Manage connections
+            </Link>
           </div>
 
           <div className="rounded-3xl border border-amber-100 bg-signal-amber p-5">
@@ -106,6 +150,31 @@ export default function SettingsPage() {
               comments, messages, or posts to community platforms on behalf of
               the business.
             </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Recent audit log
+            </p>
+            <div className="mt-4 space-y-3">
+              {auditLogs.length ? (
+                auditLogs.map((log) => (
+                  <div key={log.id} className="rounded-2xl bg-slate-50 p-3">
+                    <p className="text-sm font-bold text-slate-900">
+                      {log.action}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">
+                  Actions will appear here after signup, imports, approvals,
+                  and setting changes.
+                </p>
+              )}
+            </div>
           </div>
         </aside>
       </div>

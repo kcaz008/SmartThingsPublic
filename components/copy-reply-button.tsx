@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 
-export function CopyReplyButton({ text }: { text: string }) {
+export function CopyReplyButton({
+  text,
+  replyId,
+}: {
+  text: string;
+  replyId?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copyReply() {
     await navigator.clipboard.writeText(text);
+    if (replyId) {
+      await fetch(`/api/replies/${replyId}/copy`, { method: "POST" });
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
   }

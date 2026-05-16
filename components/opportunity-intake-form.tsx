@@ -9,6 +9,7 @@ type IntakeResult = {
   analysis: AiAnalysis;
   ai_analysis: LocalSignalAnalysisOutput;
   reply: string;
+  opportunityId?: string;
 };
 
 export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
@@ -78,11 +79,15 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
 
           <Field label="Source">
             <select name="sourceId" className={inputClassName}>
-              {sources.map((source) => (
-                <option key={source.id} value={source.id}>
-                  {source.name}
-                </option>
-              ))}
+              {sources.length ? (
+                sources.map((source) => (
+                  <option key={source.id} value={source.id}>
+                    {source.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">Manual intake</option>
+              )}
             </select>
           </Field>
 
@@ -168,6 +173,14 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
               {result.reply}
             </p>
           </div>
+          {result.opportunityId ? (
+            <a
+              href={`/opportunities/${result.opportunityId}`}
+              className="mt-5 inline-flex rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20"
+            >
+              Review opportunity
+            </a>
+          ) : null}
         </div>
       ) : null}
     </div>
