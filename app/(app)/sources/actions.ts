@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
+import { recommendedKeywords } from "@/lib/default-keywords";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { SourceType } from "@/lib/types";
 
@@ -87,6 +88,33 @@ export async function addKeywordAction(formData: FormData) {
     targetTable: "target_keywords",
     targetId: data?.id,
     metadata: { keyword },
+  });
+
+  revalidatePath("/sources");
+}
+
+export async function addRecommendedKeywordsAction() {
+  const authContext = await requireAuthContext();
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase || !authContext.businessId) {
+    return;
+  }
+
+  await supabase.from("target_keywords").upsert(
+    recommendedKeywords.map((keyword) => ({
+      business_id: authContext.businessId,
+      keyword,
+    })),
+    { onConflict: "business_id,keyword" },
+  );
+
+  await logAuditEvent({
+    businessId: authContext.businessId,
+    userId: authContext.user.id,
+    action: "keyword.recommended_set_added",
+    targetTable: "target_keywords",
+    metadata: { count: recommendedKeywords.length },
   });
 
   revalidatePath("/sources");

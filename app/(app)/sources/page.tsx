@@ -1,8 +1,13 @@
 import { PageHeader } from "@/components/page-header";
 import { Field, inputClassName } from "@/components/form-controls";
 import { requireAuthContext } from "@/lib/auth";
+import { recommendedKeywordGroups } from "@/lib/default-keywords";
 import { listSources, listTargetKeywords } from "@/lib/data";
-import { addKeywordAction, addSourceAction } from "./actions";
+import {
+  addKeywordAction,
+  addRecommendedKeywordsAction,
+  addSourceAction,
+} from "./actions";
 
 const typeLabels: Record<string, string> = {
   facebook_group: "Facebook group",
@@ -160,6 +165,27 @@ export default async function SourcesPage() {
             </button>
           </form>
 
+          <form
+            action={addRecommendedKeywordsAction}
+            className="rounded-3xl border border-blue-100 bg-signal-sky p-5"
+          >
+            <p className="text-sm font-bold text-blue-950">
+              Recommended keyword set
+            </p>
+            <p className="mt-3 text-sm leading-6 text-blue-950/80">
+              Based on Atlantic Air & Heat&apos;s website: emergency service,
+              AC/heating repair, heat pumps, mini splits, maintenance, duct
+              cleaning, indoor air quality, financing, rebates, and Long Island
+              service areas.
+            </p>
+            <button
+              type="submit"
+              className="mt-4 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-blue-800 ring-1 ring-blue-100"
+            >
+              Add all recommended keywords
+            </button>
+          </form>
+
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
               Active keywords
@@ -181,6 +207,31 @@ export default async function SourcesPage() {
                 </p>
               )}
               </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Keyword ideas by category
+            </p>
+            <div className="mt-4 space-y-4">
+              {recommendedKeywordGroups.map((group) => (
+                <div key={group.category} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-sm font-black text-slate-950">
+                    {group.category}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {group.keywords.slice(0, 8).map((keyword) => (
+                      <span
+                        key={keyword}
+                        className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="rounded-3xl border border-amber-100 bg-signal-amber p-5">

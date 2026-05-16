@@ -137,8 +137,31 @@ await supabase.from("connected_accounts").insert({
 
 await supabase.from("target_keywords").insert([
   { business_id: business.id, keyword: "AC not cooling" },
+  { business_id: business.id, keyword: "no heat" },
+  { business_id: business.id, keyword: "no AC" },
+  { business_id: business.id, keyword: "heat not working" },
+  { business_id: business.id, keyword: "emergency HVAC" },
+  { business_id: business.id, keyword: "AC stopped working" },
+  { business_id: business.id, keyword: "boiler not working" },
+  { business_id: business.id, keyword: "AC blowing warm air" },
+  { business_id: business.id, keyword: "air conditioner leaking" },
   { business_id: business.id, keyword: "furnace quote" },
   { business_id: business.id, keyword: "thermostat blank" },
+  { business_id: business.id, keyword: "second opinion HVAC quote" },
+  { business_id: business.id, keyword: "heat pump installation" },
+  { business_id: business.id, keyword: "mini split installation" },
+  { business_id: business.id, keyword: "ductless AC" },
+  { business_id: business.id, keyword: "oil to heat pump" },
+  { business_id: business.id, keyword: "HVAC financing" },
+  { business_id: business.id, keyword: "NYSERDA rebate" },
+  { business_id: business.id, keyword: "AC tune up" },
+  { business_id: business.id, keyword: "HVAC maintenance plan" },
+  { business_id: business.id, keyword: "duct cleaning" },
+  { business_id: business.id, keyword: "indoor air quality" },
+  { business_id: business.id, keyword: "Garden City HVAC" },
+  { business_id: business.id, keyword: "Huntington HVAC" },
+  { business_id: business.id, keyword: "Nassau County HVAC" },
+  { business_id: business.id, keyword: "Suffolk County HVAC" },
 ]);
 
 await supabase.from("reputation_memories").insert([

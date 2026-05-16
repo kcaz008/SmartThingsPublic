@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase";
+import { recommendedKeywords } from "@/lib/default-keywords";
 import {
   aiReplies as sampleReplies,
   competitorMentions as sampleCompetitorMentions,
@@ -323,7 +324,12 @@ export async function listTargetKeywords(businessId: string | null) {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase || !businessId) {
-    return [] satisfies TargetKeyword[];
+    return recommendedKeywords.map((keyword, index) => ({
+      id: `demo_keyword_${index}`,
+      businessId: businessId ?? sampleBusiness.id,
+      keyword,
+      createdAt: new Date(0).toISOString(),
+    })) satisfies TargetKeyword[];
   }
 
   const { data, error } = await supabase
