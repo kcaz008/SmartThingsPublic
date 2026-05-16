@@ -1,6 +1,5 @@
 import { PageHeader } from "@/components/page-header";
 import { sources } from "@/lib/sample-data";
-import { formatDateTime } from "@/lib/format";
 
 const typeLabels: Record<string, string> = {
   facebook_group: "Facebook group",
@@ -38,9 +37,7 @@ export default function SourcesPage() {
                 <h2 className="mt-2 text-xl font-black text-slate-950">
                   {source.name}
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {source.neighborhood}
-                </p>
+                <p className="mt-1 text-sm text-slate-500">{source.town}</p>
               </div>
               <span
                 className={`rounded-full px-3 py-1 text-xs font-bold ${
@@ -53,25 +50,19 @@ export default function SourcesPage() {
               </span>
             </div>
 
-            <div className="mt-6">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-slate-600">
-                  Lead quality
-                </span>
-                <span className="font-black text-slate-950">
-                  {source.leadScore}
-                </span>
-              </div>
-              <div className="mt-2 h-3 rounded-full bg-slate-100">
-                <div
-                  className="h-3 rounded-full bg-signal-blue"
-                  style={{ width: `${source.leadScore}%` }}
-                />
-              </div>
+            <div className="mt-6 rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                Town
+              </p>
+              <p className="mt-2 font-semibold text-slate-900">
+                {source.town}
+              </p>
             </div>
 
             <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-              Last checked {formatDateTime(source.lastCheckedAt)}
+              {source.active
+                ? "Active for manual opportunity intake."
+                : "Paused and hidden from active monitoring workflows."}
               {source.url ? (
                 <a
                   href={source.url}

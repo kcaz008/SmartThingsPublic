@@ -48,13 +48,13 @@ one business-name mention.
 Apply `supabase/schema.sql` to create:
 
 - `businesses`
-- `users`
 - `sources`
 - `opportunities`
 - `ai_replies`
 
-The schema includes opportunity statuses, autopilot modes, indexes, updated-at
-triggers, and row-level security policies scoped by business.
+The schema includes opportunity statuses, autopilot modes, source types,
+business-scoped indexes, and row-level security policies keyed by the
+authenticated user's `app_metadata.business_id` claim.
 
 ## MVP pages
 
@@ -62,4 +62,4 @@ triggers, and row-level security policies scoped by business.
 - Add Opportunity: manual post intake with AI analysis and reply drafting
 - Opportunity Detail: original post, AI analysis, draft, copy-to-clipboard
 - Sources: tracked community/source records
-- Settings: business profile, reply tone, autopilot mode
+- Settings: business profile, tone rules, autopilot mode

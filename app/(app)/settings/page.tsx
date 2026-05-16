@@ -64,13 +64,13 @@ export default function SettingsPage() {
 
           <section>
             <Field
-              label="Reply tone"
+              label="Tone rules"
               hint="Used by OpenAI when draft generation is enabled"
             >
               <textarea
                 rows={5}
                 className={inputClassName}
-                defaultValue={currentBusiness.tone}
+                defaultValue={currentBusiness.toneRules}
               />
             </Field>
           </section>

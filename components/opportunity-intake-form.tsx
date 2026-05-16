@@ -27,9 +27,9 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
       title: String(formData.get("title") ?? ""),
       post_text: String(formData.get("postText") ?? ""),
       authorName: String(formData.get("authorName") ?? ""),
-      neighborhood: String(formData.get("neighborhood") ?? ""),
+      detected_town: String(formData.get("town") ?? ""),
       sourceId: String(formData.get("sourceId") ?? ""),
-      sourceName:
+      source_name:
         sources.find((source) => source.id === formData.get("sourceId"))
           ?.name ?? "Manual intake",
       source_type:
@@ -94,9 +94,9 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
             />
           </Field>
 
-          <Field label="Neighborhood">
+          <Field label="Town">
             <input
-              name="neighborhood"
+              name="town"
               className={inputClassName}
               placeholder="Maple Grove"
             />

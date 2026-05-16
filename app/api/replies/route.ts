@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createAiAnalysis } from "@/lib/openai";
-import { currentBusiness, getOpportunityById } from "@/lib/sample-data";
+import {
+  currentBusiness,
+  getOpportunityById,
+  getSourceById,
+} from "@/lib/sample-data";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -14,14 +18,15 @@ export async function POST(request: Request) {
     );
   }
 
+  const source = getSourceById(opportunity.sourceId);
   const analysis = await createAiAnalysis({
-    post_text: `${opportunity.title}\n\n${opportunity.postText}`,
-    source_name: opportunity.sourceName,
-    source_type: "manual",
+    post_text: opportunity.originalText,
+    source_name: source?.name ?? "Manual intake",
+    source_type: source?.type ?? "manual",
     service_area: currentBusiness.serviceArea,
     company_name: currentBusiness.name,
     company_phone: currentBusiness.phone,
-    tone_rules: currentBusiness.tone,
+    tone_rules: currentBusiness.toneRules,
   });
 
   return NextResponse.json({

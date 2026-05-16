@@ -4,16 +4,19 @@ import { OpportunityCard } from "@/components/opportunity-card";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
 import { opportunities, sources } from "@/lib/sample-data";
-import { formatCurrency } from "@/lib/format";
 
 export default function DashboardPage() {
   const activeOpportunities = opportunities.filter(
     (opportunity) => !["won", "lost", "ignored"].includes(opportunity.status),
   );
-  const pipelineValue = activeOpportunities.reduce(
-    (total, opportunity) => total + opportunity.estimatedValue,
-    0,
-  );
+  const averageLeadScore = activeOpportunities.length
+    ? Math.round(
+        activeOpportunities.reduce(
+          (total, opportunity) => total + opportunity.leadScore,
+          0,
+        ) / activeOpportunities.length,
+      )
+    : 0;
   const draftedCount = opportunities.filter(
     (opportunity) => opportunity.status === "drafted",
   ).length;
@@ -56,9 +59,9 @@ export default function DashboardPage() {
           tone="green"
         />
         <StatCard
-          label="Pipeline"
-          value={formatCurrency(pipelineValue)}
-          helper="Estimated value from active neighborhood leads."
+          label="Avg. lead score"
+          value={String(averageLeadScore)}
+          helper="AI lead score across active neighborhood opportunities."
           tone="blue"
         />
       </section>
@@ -126,12 +129,7 @@ export default function DashboardPage() {
                       {source.active ? "Active" : "Paused"}
                     </span>
                   </div>
-                  <div className="mt-3 h-2 rounded-full bg-white">
-                    <div
-                      className="h-2 rounded-full bg-signal-blue"
-                      style={{ width: `${source.leadScore}%` }}
-                    />
-                  </div>
+                  <p className="mt-2 text-sm text-slate-500">{source.town}</p>
                 </div>
               ))}
             </div>

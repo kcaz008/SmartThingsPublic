@@ -6,8 +6,9 @@ import { PlainBadge, StatusBadge, UrgencyBadge } from "@/components/status-badge
 import {
   getOpportunityById,
   getReplyForOpportunity,
+  getSourceById,
 } from "@/lib/sample-data";
-import { formatCurrency, formatDateTime, percentage } from "@/lib/format";
+import { formatDateTime, summarizeText } from "@/lib/format";
 
 export default async function OpportunityDetailPage({
   params,
@@ -22,12 +23,13 @@ export default async function OpportunityDetailPage({
   }
 
   const reply = getReplyForOpportunity(opportunity.id);
+  const source = getSourceById(opportunity.sourceId);
 
   return (
     <>
       <PageHeader
         eyebrow="Opportunity detail"
-        title={opportunity.title}
+        title={summarizeText(opportunity.originalText, 88)}
         description="Review the original post, AI analysis, and reply draft before manually responding in the source community."
         action={
           <Link
@@ -45,15 +47,15 @@ export default async function OpportunityDetailPage({
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={opportunity.status} />
               <UrgencyBadge urgency={opportunity.urgency} />
-              <PlainBadge>{percentage(opportunity.confidence)} confidence</PlainBadge>
-              <PlainBadge>{formatCurrency(opportunity.estimatedValue)}</PlainBadge>
+              <PlainBadge>{opportunity.leadScore} lead score</PlainBadge>
+              <PlainBadge>{opportunity.serviceType}</PlainBadge>
             </div>
             <div className="mt-6 rounded-3xl bg-slate-50 p-5">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
                 Original post
               </p>
               <p className="mt-3 text-lg leading-8 text-slate-800">
-                {opportunity.postText}
+                {opportunity.originalText}
               </p>
             </div>
             <dl className="mt-6 grid gap-4 md:grid-cols-3">
@@ -70,18 +72,26 @@ export default async function OpportunityDetailPage({
                   Source
                 </dt>
                 <dd className="mt-1 font-semibold text-slate-900">
-                  {opportunity.sourceName}
+                  {source?.name ?? "Unknown source"}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
-                  Detected
+                  Created
                 </dt>
                 <dd className="mt-1 font-semibold text-slate-900">
-                  {formatDateTime(opportunity.detectedAt)}
+                  {formatDateTime(opportunity.createdAt)}
                 </dd>
               </div>
             </dl>
+            {opportunity.postUrl ? (
+              <a
+                href={opportunity.postUrl}
+                className="mt-5 inline-flex text-sm font-bold text-blue-700"
+              >
+                Open original post
+              </a>
+            ) : null}
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
@@ -94,11 +104,13 @@ export default async function OpportunityDetailPage({
                   Human review required
                 </h2>
               </div>
-              {reply ? <CopyReplyButton text={reply.body} /> : null}
+              {reply ? <CopyReplyButton text={reply.draftText} /> : null}
             </div>
             {reply ? (
               <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50 p-5">
-                <p className="text-base leading-8 text-slate-800">{reply.body}</p>
+                <p className="text-base leading-8 text-slate-800">
+                  {reply.draftText}
+                </p>
               </div>
             ) : (
               <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
@@ -114,18 +126,18 @@ export default async function OpportunityDetailPage({
               AI analysis
             </p>
             <div className="mt-4 space-y-4">
-              <AnalysisRow label="Category" value={opportunity.aiAnalysis.category} />
+              <AnalysisRow label="Service type" value={opportunity.serviceType} />
               <AnalysisRow
-                label="Homeowner intent"
-                value={opportunity.aiAnalysis.homeownerIntent}
+                label="Detected town"
+                value={opportunity.detectedTown}
               />
               <AnalysisRow
-                label="Recommended action"
-                value={opportunity.aiAnalysis.recommendedAction}
+                label="Sentiment"
+                value={opportunity.sentiment}
               />
               <AnalysisRow
-                label="Spam risk"
-                value={opportunity.aiAnalysis.spamRisk}
+                label="Intent type"
+                value={opportunity.intentType.replaceAll("_", " ")}
               />
             </div>
           </div>

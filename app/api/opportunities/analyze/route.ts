@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     service_area: String(body.service_area ?? currentBusiness.serviceArea),
     company_name: String(body.company_name ?? currentBusiness.name),
     company_phone: String(body.company_phone ?? currentBusiness.phone),
-    tone_rules: String(body.tone_rules ?? currentBusiness.tone),
+    tone_rules: String(body.tone_rules ?? currentBusiness.toneRules),
   });
   const analysis = localSignalAnalysisToOpportunityAnalysis(aiAnalysis);
 

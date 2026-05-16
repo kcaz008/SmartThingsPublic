@@ -20,6 +20,21 @@ export const autopilotModes = [
 export type AutopilotMode = (typeof autopilotModes)[number];
 
 export type UrgencyLevel = "low" | "medium" | "high" | "emergency";
+export type LeadUrgency = "low" | "medium" | "high";
+export type SourceType =
+  | "facebook_group"
+  | "nextdoor"
+  | "reddit"
+  | "manual"
+  | "other";
+export type IntentType =
+  | "recommendation_request"
+  | "urgent_repair"
+  | "price_check"
+  | "maintenance_question"
+  | "complaint"
+  | "not_relevant"
+  | "other";
 
 export type User = {
   id: string;
@@ -32,9 +47,8 @@ export type User = {
 export type Business = {
   id: string;
   name: string;
-  vertical: "hvac";
   serviceArea: string;
-  tone: string;
+  toneRules: string;
   phone: string;
   website: string;
   autopilotMode: AutopilotMode;
@@ -44,12 +58,10 @@ export type Source = {
   id: string;
   businessId: string;
   name: string;
-  type: "facebook_group" | "nextdoor" | "reddit" | "manual" | "other";
+  type: SourceType;
   url?: string;
-  neighborhood: string;
+  town: string;
   active: boolean;
-  leadScore: number;
-  lastCheckedAt: string;
 };
 
 export type AiAnalysis = {
@@ -66,26 +78,25 @@ export type Opportunity = {
   id: string;
   businessId: string;
   sourceId: string;
-  sourceName: string;
-  title: string;
+  originalText: string;
+  postUrl?: string;
   authorName: string;
-  neighborhood: string;
-  postText: string;
+  detectedTown: string;
+  serviceType: string;
+  urgency: LeadUrgency;
+  leadScore: number;
+  sentiment: string;
+  intentType: IntentType;
   status: OpportunityStatus;
-  urgency: UrgencyLevel;
-  confidence: number;
-  estimatedValue: number;
-  detectedAt: string;
-  tags: string[];
-  aiAnalysis: AiAnalysis;
+  createdAt: string;
 };
 
 export type AiReply = {
   id: string;
   opportunityId: string;
-  body: string;
-  tone: "neighborly" | "professional" | "concise";
-  status: "draft" | "approved" | "copied";
-  model: string;
+  draftText: string;
+  approved: boolean;
+  copied: boolean;
+  postedManually: boolean;
   createdAt: string;
 };

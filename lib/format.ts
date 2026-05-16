@@ -60,3 +60,13 @@ export function formatDateTime(value: string) {
 export function percentage(value: number) {
   return `${Math.round(value * 100)}%`;
 }
+
+export function summarizeText(value: string, maxLength = 72) {
+  const trimmed = value.replace(/\s+/g, " ").trim();
+
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, maxLength - 1).trim()}...`;
+}
