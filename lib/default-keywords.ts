@@ -1,0 +1,82 @@
+export const recommendedKeywordGroups = [
+  {
+    category: "Emergency HVAC",
+    keywords: [
+      "no heat",
+      "no AC",
+      "AC not cooling",
+      "heat not working",
+      "emergency HVAC",
+      "AC stopped working",
+      "furnace not turning on",
+      "boiler not working",
+      "HVAC repair today",
+      "same day AC repair",
+    ],
+  },
+  {
+    category: "Repairs and diagnostics",
+    keywords: [
+      "AC blowing warm air",
+      "air conditioner leaking",
+      "thermostat blank",
+      "system keeps freezing",
+      "strange HVAC noise",
+      "burning smell furnace",
+      "short cycling",
+      "weak airflow",
+      "second opinion HVAC quote",
+      "honest HVAC company",
+    ],
+  },
+  {
+    category: "Installation and replacement",
+    keywords: [
+      "AC replacement",
+      "furnace replacement",
+      "heat pump installation",
+      "mini split installation",
+      "ductless AC",
+      "oil to heat pump",
+      "new HVAC system",
+      "HVAC financing",
+      "NYSERDA rebate",
+      "federal tax credit heat pump",
+    ],
+  },
+  {
+    category: "Maintenance and air quality",
+    keywords: [
+      "AC tune up",
+      "heating maintenance",
+      "HVAC maintenance plan",
+      "duct cleaning",
+      "indoor air quality",
+      "humidity problem",
+      "dirty ducts",
+      "filter replacement",
+      "annual HVAC service",
+      "maintenance plan",
+    ],
+  },
+  {
+    category: "Service areas",
+    keywords: [
+      "Garden City HVAC",
+      "Great Neck HVAC",
+      "Manhasset HVAC",
+      "Huntington HVAC",
+      "Smithtown HVAC",
+      "Port Jefferson HVAC",
+      "Cold Spring Harbor HVAC",
+      "Syosset HVAC",
+      "Hamptons HVAC",
+      "Nassau County HVAC",
+      "Suffolk County HVAC",
+    ],
+  },
+] as const;
+
+export const recommendedKeywords = recommendedKeywordGroups.flatMap(
+  (group) => group.keywords,
+);

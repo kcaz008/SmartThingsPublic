@@ -10,6 +10,7 @@ const eslintConfig = defineConfig([
     "node_modules/**",
     "out/**",
     "build/**",
+    "browser-extension/**",
     "next-env.d.ts",
     "smartapps/**",
     "devicetypes/**",

@@ -2,13 +2,19 @@
 
 import { useState } from "react";
 import { Field, inputClassName } from "@/components/form-controls";
+import { ReplyVariantOptions } from "@/components/reply-variant-options";
 import type { AiAnalysis, Source } from "@/lib/types";
 import type { LocalSignalAnalysisOutput } from "@/lib/openai";
+import type { ReplyVariant } from "@/lib/reply-variants";
 
 type IntakeResult = {
   analysis: AiAnalysis;
   ai_analysis: LocalSignalAnalysisOutput;
   reply: string;
+  replyOptions?: ReplyVariant[];
+  autopilotNotice?: string;
+  autoPosted?: boolean;
+  opportunityId?: string;
 };
 
 export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
@@ -28,6 +34,7 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
       post_text: String(formData.get("postText") ?? ""),
       authorName: String(formData.get("authorName") ?? ""),
       detected_town: String(formData.get("town") ?? ""),
+      postUrl: String(formData.get("postUrl") ?? ""),
       sourceId: String(formData.get("sourceId") ?? ""),
       source_name:
         sources.find((source) => source.id === formData.get("sourceId"))
@@ -78,11 +85,15 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
 
           <Field label="Source">
             <select name="sourceId" className={inputClassName}>
-              {sources.map((source) => (
-                <option key={source.id} value={source.id}>
-                  {source.name}
-                </option>
-              ))}
+              {sources.length ? (
+                sources.map((source) => (
+                  <option key={source.id} value={source.id}>
+                    {source.name}
+                  </option>
+                ))
+              ) : (
+                <option value="">Manual intake</option>
+              )}
             </select>
           </Field>
 
@@ -99,6 +110,15 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
               name="town"
               className={inputClassName}
               placeholder="Maple Grove"
+            />
+          </Field>
+
+          <Field label="Original post URL" hint="Optional direct link">
+            <input
+              name="postUrl"
+              type="url"
+              className={inputClassName}
+              placeholder="https://facebook.com/groups/.../posts/..."
             />
           </Field>
         </div>
@@ -162,12 +182,34 @@ export function OpportunityIntakeForm({ sources }: { sources: Source[] }) {
           <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             {result.ai_analysis.reasoning_summary}
           </p>
-          <div className="mt-5 rounded-3xl bg-blue-50 p-5">
-            <p className="text-sm font-bold text-blue-950">Reply draft</p>
-            <p className="mt-2 text-base leading-8 text-slate-800">
-              {result.reply}
+          {result.autopilotNotice ? (
+            <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
+              {result.autopilotNotice}
             </p>
-          </div>
+          ) : null}
+          {result.replyOptions?.length ? (
+            <>
+              <p className="mt-5 text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+                Three AI reply options
+              </p>
+              <ReplyVariantOptions variants={result.replyOptions} />
+            </>
+          ) : (
+            <div className="mt-5 rounded-3xl bg-blue-50 p-5">
+              <p className="text-sm font-bold text-blue-950">Reply draft</p>
+              <p className="mt-2 text-base leading-8 text-slate-800">
+                {result.reply}
+              </p>
+            </div>
+          )}
+          {result.opportunityId ? (
+            <a
+              href={`/opportunities/${result.opportunityId}`}
+              className="mt-5 inline-flex rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20"
+            >
+              Review opportunity
+            </a>
+          ) : null}
         </div>
       ) : null}
     </div>

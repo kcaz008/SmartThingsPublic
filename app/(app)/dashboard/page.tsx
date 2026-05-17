@@ -3,9 +3,59 @@ import { FilterChip } from "@/components/filter-chip";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { opportunities, sources } from "@/lib/sample-data";
+import { requireAuthContext } from "@/lib/auth";
+import {
+  listCompetitorMentions,
+  listFacebookReplyHistory,
+  listOpportunities,
+  listReputationMemories,
+  listSources,
+  listTeamMembers,
+} from "@/lib/data";
+import {
+  buildLeadAnalytics,
+  deriveLeadIntelligence,
+} from "@/lib/lead-intelligence";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const authContext = await requireAuthContext();
+  const [
+    opportunities,
+    sources,
+    teamMembers,
+    replyHistory,
+    reputationMemories,
+    competitorMentions,
+  ] = await Promise.all([
+    listOpportunities(authContext.businessId),
+    listSources(authContext.businessId),
+    listTeamMembers(authContext.businessId),
+    listFacebookReplyHistory(authContext.businessId),
+    listReputationMemories(authContext.businessId),
+    listCompetitorMentions(authContext.businessId),
+  ]);
+  const intelligenceById = new Map(
+    opportunities.map((opportunity) => {
+      const source = sources.find((item) => item.id === opportunity.sourceId);
+      return [
+        opportunity.id,
+        deriveLeadIntelligence({
+          opportunity,
+          source,
+          teamMembers,
+          replyHistory,
+          reputationMemories,
+          competitorMentions,
+        }),
+      ];
+    }),
+  );
+  const analytics = buildLeadAnalytics({
+    opportunities,
+    sources,
+    intelligenceById,
+    competitorMentions,
+  });
   const activeOpportunities = opportunities.filter(
     (opportunity) => !["won", "lost", "ignored"].includes(opportunity.status),
   );
@@ -42,9 +92,9 @@ export default function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Open signals"
-          value={String(activeOpportunities.length)}
-          helper="New, drafted, approved, replied, and booked opportunities."
+          label="Hot this week"
+          value={String(analytics.hotLeadsThisWeek)}
+          helper="Leads that need fast, careful response."
         />
         <StatCard
           label="Drafts ready"
@@ -53,17 +103,127 @@ export default function DashboardPage() {
           tone="amber"
         />
         <StatCard
-          label="Booked"
-          value={String(bookedCount)}
-          helper="Manual follow-up led to an appointment."
+          label="Response rate"
+          value={`${analytics.responseRate}%`}
+          helper="Replied, booked, or won out of all tracked leads."
           tone="green"
         />
         <StatCard
-          label="Avg. lead score"
-          value={String(averageLeadScore)}
-          helper="AI lead score across active neighborhood opportunities."
+          label="Follow-ups needed"
+          value={String(analytics.followUpsNeeded)}
+          helper={`Avg score ${averageLeadScore}; ${bookedCount} booked.`}
           tone="blue"
         />
+      </section>
+
+      <section className="mt-6 grid gap-4 lg:grid-cols-3">
+        <AnalyticsCard title="Leads by town" items={analytics.leadsByTown} />
+        <AnalyticsCard title="Leads by group" items={analytics.leadsByGroup} />
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+            Competitive signals
+          </p>
+          <p className="mt-3 text-3xl font-black text-slate-950">
+            {analytics.competitorMentions}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Competitor mentions tracked across local groups. Booked/closed:
+            {" "}
+            {analytics.bookedClosedCount}.
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <CoordinationCard
+          title="Leads needing second responder"
+          value={String(analytics.secondResponderNeeded)}
+          helper="A teammate should follow after the first public reply."
+        />
+        <CoordinationCard
+          title="Team collisions"
+          value={String(analytics.teamCollisions)}
+          helper="Recent replies, assignments, or closed-lead conflicts."
+        />
+        <CoordinationCard
+          title="Wrong-brand risk"
+          value={String(analytics.wrongBrandRisk)}
+          helper="Leads that may not match the active client brand."
+        />
+        <CoordinationCard
+          title="DM recommended"
+          value={String(analytics.dmRecommended)}
+          helper="Groups or threads where public replies are risky."
+        />
+        <CoordinationCard
+          title="Hot leads with no owner"
+          value={String(analytics.hotUnassigned)}
+          helper="Hot opportunities that still need assignment."
+        />
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+            Follow-ups by owner/team
+          </p>
+          <div className="mt-4 space-y-3">
+            {analytics.followUpsByEmployee.length ? (
+              analytics.followUpsByEmployee.map((item) => (
+                <div key={item.label} className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">
+                    {item.label}
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                    {item.count}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">No follow-ups queued.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-3xl border border-blue-100 bg-signal-sky p-5">
+        <p className="text-sm font-bold uppercase tracking-[0.18em] text-blue-900">
+          Demo workflow examples
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <DemoLink
+            href="/opportunities/opp_ac_not_cooling"
+            title="Company replied first; personal follow-up"
+            helper="Competitor commented after our first company reply."
+          />
+          <DemoLink
+            href="/opportunities/opp_second_opinion"
+            title="Copied but not posted"
+            helper="Shows copied draft, no posted confirmation."
+          />
+          <DemoLink
+            href="/opportunities/opp_booked_tuneup"
+            title="No more company comments"
+            helper="Customer asked companies to stop replying."
+          />
+          <DemoLink
+            href="/opportunities/opp_wrong_brand"
+            title="Wrong-brand risk"
+            helper="Lead mentions Harbor Home while Atlantic is active."
+          />
+          <DemoLink
+            href="/opportunities/opp_hostile_thread"
+            title="Promo-sensitive group"
+            helper="Massapequa group should be DM-first."
+          />
+          <DemoLink
+            href="/opportunities/opp_phone_repeat"
+            title="Phone already posted"
+            helper="Next draft avoids repeating the phone number."
+          />
+          <DemoLink
+            href="/opportunities/opp_scrubbed_demo"
+            title="Scrubbed actionable item"
+            helper="Noisy post gets cleaned before choosing AI replies."
+          />
+        </div>
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_22rem]">
@@ -79,6 +239,8 @@ export default function DashboardPage() {
               <OpportunityCard
                 key={opportunity.id}
                 opportunity={opportunity}
+                source={sources.find((source) => source.id === opportunity.sourceId)}
+                intelligence={intelligenceById.get(opportunity.id)}
               />
             ))}
           </div>
@@ -97,8 +259,8 @@ export default function DashboardPage() {
               helpful neighbor, not a bot or billboard.
             </p>
             <div className="mt-5 rounded-2xl bg-signal-mint p-4 text-sm font-semibold text-emerald-900">
-              Autopilot is set to draft only. No posts are published
-              automatically.
+              Manual approval is the default. LocalSignal drafts replies but
+              does not publish posts automatically.
             </div>
           </div>
 
@@ -137,5 +299,77 @@ export default function DashboardPage() {
         </aside>
       </section>
     </>
+  );
+}
+
+function CoordinationCard({
+  title,
+  value,
+  helper,
+}: {
+  title: string;
+  value: string;
+  helper: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+      <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+        {title}
+      </p>
+      <p className="mt-3 text-3xl font-black text-slate-950">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{helper}</p>
+    </div>
+  );
+}
+
+function DemoLink({
+  href,
+  title,
+  helper,
+}: {
+  href: string;
+  title: string;
+  helper: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-50"
+    >
+      <p className="font-black text-blue-950">{title}</p>
+      <p className="mt-2 leading-6 text-blue-900/75">{helper}</p>
+    </Link>
+  );
+}
+
+function AnalyticsCard({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ label: string; count: number }>;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+      <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+        {title}
+      </p>
+      <div className="mt-4 space-y-3">
+        {items.length ? (
+          items.map((item) => (
+            <div key={item.label} className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700">
+                {item.label}
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
+                {item.count}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-slate-500">No leads yet.</p>
+        )}
+      </div>
+    </div>
   );
 }

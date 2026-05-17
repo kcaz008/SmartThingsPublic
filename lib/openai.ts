@@ -71,6 +71,8 @@ export async function createAiAnalysis(
           "Sound local, helpful, and human.",
           "Keep suggested_reply under 75 words.",
           "Mention the business name no more than once.",
+          "Vary wording, sentence length, CTA, tone, phone-number usage, and whether to mention the company name.",
+          "Use company knowledge and phrases-to-avoid from tone_rules when present.",
           "Do not be salesy.",
           "Include light helpful context when appropriate.",
         ].join(" "),
@@ -354,12 +356,25 @@ function buildHelpfulReply(
   input: LocalSignalAnalysisInput,
   urgency: LocalSignalAnalysisOutput["urgency"],
 ) {
+  const variation = Math.abs(hashString(input.post_text)) % 4;
   const context =
     urgency === "high"
       ? "A quick check of airflow, the outdoor unit, and thermostat settings can help narrow it down."
       : "It can help to note when it started and whether the system is cooling, heating, or making noise.";
 
-  return `Hey - sounds frustrating. ${context} ${input.company_name} is local and can help take a look if you still need someone. Happy to point you in the right direction either way.`;
+  if (variation === 0) {
+    return `Sorry you are dealing with that. ${context} ${input.company_name} can help take a look if you still need someone.`;
+  }
+
+  if (variation === 1) {
+    return `That sounds worth checking sooner than later. ${context} If helpful, ${input.company_name} can point you in the right direction without pressure.`;
+  }
+
+  if (variation === 2) {
+    return `A quick HVAC check may save some guessing here. ${context} Happy to help if you still need a local option.`;
+  }
+
+  return `For something like this, I would start with ${context.toLowerCase()} ${input.company_name} is local; call or text ${input.company_phone} if you want help sorting it out.`;
 }
 
 function normalizeLocalSignalAnalysis(
@@ -416,6 +431,12 @@ function clamp(value: number, min: number, max: number) {
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function hashString(value: string) {
+  return value.split("").reduce((hash, char) => {
+    return (hash * 31 + char.charCodeAt(0)) | 0;
+  }, 7);
 }
 
 function placeholderReply(
