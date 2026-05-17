@@ -62,6 +62,10 @@ type SourceRow = {
   phone_safe_in_public: boolean | null;
   dm_first_preferred: boolean | null;
   second_responder_works: boolean | null;
+  assigned_team_member_id?: string | null;
+  last_checked_at?: string | null;
+  check_frequency?: string | null;
+  notes?: string | null;
 };
 
 type OpportunityRow = {
@@ -657,6 +661,10 @@ function mapSource(row: SourceRow): Source {
     phoneSafeInPublic: row.phone_safe_in_public ?? true,
     dmFirstPreferred: row.dm_first_preferred ?? false,
     secondResponderWorks: row.second_responder_works ?? true,
+    assignedTeamMemberId: row.assigned_team_member_id ?? undefined,
+    lastCheckedAt: row.last_checked_at ?? undefined,
+    checkFrequency: row.check_frequency ?? undefined,
+    notes: row.notes ?? undefined,
   };
 }
 

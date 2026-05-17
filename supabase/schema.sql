@@ -102,7 +102,11 @@ create table public.sources (
     check (best_reply_style in ('company', 'personal', 'both')),
   phone_safe_in_public boolean not null default true,
   dm_first_preferred boolean not null default false,
-  second_responder_works boolean not null default true
+  second_responder_works boolean not null default true,
+  assigned_team_member_id uuid references public.team_members(id) on delete set null,
+  last_checked_at timestamptz,
+  check_frequency text,
+  notes text
 );
 
 create table public.opportunities (
@@ -222,6 +226,25 @@ create table public.competitor_mentions (
   created_at timestamptz not null default now()
 );
 
+create table public.browser_imports (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid not null references public.businesses(id) on delete cascade,
+  source text not null default 'facebook_browser_assist',
+  group_name text not null,
+  group_url text,
+  post_url text,
+  poster_name text,
+  post_text text not null,
+  visible_comments text[] not null default '{}'::text[],
+  imported_by_team_member_id uuid references public.team_members(id) on delete set null,
+  text_hash text not null,
+  duplicate_of uuid references public.browser_imports(id) on delete set null,
+  status text not null default 'pending_review'
+    check (status in ('pending_review', 'saved_as_lead', 'ignored')),
+  analysis jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create table public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
@@ -269,6 +292,15 @@ create index reputation_memories_business_type_idx
 create index competitor_mentions_business_name_idx
   on public.competitor_mentions (business_id, competitor_name, created_at desc);
 
+create index browser_imports_business_status_idx
+  on public.browser_imports (business_id, status, created_at desc);
+
+create index browser_imports_post_url_idx
+  on public.browser_imports (business_id, post_url);
+
+create index browser_imports_text_hash_idx
+  on public.browser_imports (business_id, text_hash);
+
 create index audit_logs_business_created_idx
   on public.audit_logs (business_id, created_at desc);
 
@@ -283,6 +315,7 @@ alter table public.facebook_manual_posts enable row level security;
 alter table public.facebook_reply_history enable row level security;
 alter table public.reputation_memories enable row level security;
 alter table public.competitor_mentions enable row level security;
+alter table public.browser_imports enable row level security;
 alter table public.audit_logs enable row level security;
 
 create or replace function public.current_business_id()
@@ -367,6 +400,11 @@ create policy "Users can manage reputation memories"
 
 create policy "Users can manage competitor mentions"
   on public.competitor_mentions for all
+  using (business_id = public.current_business_id())
+  with check (business_id = public.current_business_id());
+
+create policy "Users can manage browser imports"
+  on public.browser_imports for all
   using (business_id = public.current_business_id())
   with check (business_id = public.current_business_id());
 

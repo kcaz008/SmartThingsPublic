@@ -44,6 +44,7 @@ const requiredTables = [
   "facebook_reply_history",
   "reputation_memories",
   "competitor_mentions",
+  "browser_imports",
   "audit_logs",
 ];
 

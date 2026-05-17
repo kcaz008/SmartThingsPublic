@@ -8,6 +8,7 @@ import { requireAuthContext } from "@/lib/auth";
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: "★", featured: true },
   { href: "/opportunities/new", label: "Add Opportunity", icon: "+" },
+  { href: "/browser-assist", label: "Browser Assist", icon: "⇄" },
   { href: "/sources", label: "Sources", icon: "◎" },
   { href: "/settings", label: "Settings", icon: "⚙" },
   { href: "/settings/clients", label: "Clients", icon: "◆" },

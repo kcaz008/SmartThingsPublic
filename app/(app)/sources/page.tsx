@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/page-header";
 import { Field, inputClassName } from "@/components/form-controls";
+import Link from "next/link";
 import { requireAuthContext } from "@/lib/auth";
 import { recommendedKeywordGroups } from "@/lib/default-keywords";
 import { listSources, listTargetKeywords } from "@/lib/data";
@@ -126,6 +127,8 @@ export default async function SourcesPage() {
                   {source.url ? (
                     <a
                       href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
                       className="mt-2 block font-semibold text-blue-700"
                     >
                       Open source
@@ -157,6 +160,31 @@ export default async function SourcesPage() {
                     <p className="font-bold text-slate-900">Second responder</p>
                     <p>{source.secondResponderWorks ? "Works here" : "Use rarely"}</p>
                   </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {source.url ? (
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-700 ring-1 ring-slate-200"
+                    >
+                      Open group
+                    </a>
+                  ) : null}
+                  <Link
+                    href="/opportunities/new"
+                    className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-700 ring-1 ring-slate-200"
+                  >
+                    Import pasted post
+                  </Link>
+                  <button
+                    type="button"
+                    disabled
+                    className="rounded-xl bg-slate-200 px-3 py-2 text-xs font-bold text-slate-500"
+                  >
+                    Import visible posts with extension
+                  </button>
                 </div>
               </article>
             ))}

@@ -120,6 +120,10 @@ export const sources: Source[] = [
     phoneSafeInPublic: false,
     dmFirstPreferred: true,
     secondResponderWorks: true,
+    assignedTeamMemberId: "tm_maria",
+    lastCheckedAt: "2026-05-16T18:30:00Z",
+    checkFrequency: "Every 2 hours during heat waves",
+    notes: "Admins dislike phone-number-first comments. DM-first is safest.",
   },
   {
     id: "src_massapequa_fb",
@@ -134,6 +138,10 @@ export const sources: Source[] = [
     phoneSafeInPublic: false,
     dmFirstPreferred: true,
     secondResponderWorks: true,
+    assignedTeamMemberId: "tm_avery",
+    lastCheckedAt: "2026-05-16T17:45:00Z",
+    checkFrequency: "Twice daily",
+    notes: "Very promo-sensitive. Use personal helpful replies.",
   },
   {
     id: "src_manual",
@@ -148,6 +156,8 @@ export const sources: Source[] = [
     phoneSafeInPublic: true,
     dmFirstPreferred: false,
     secondResponderWorks: false,
+    checkFrequency: "As needed",
+    notes: "Internal manual intake source.",
   },
   {
     id: "src_huntington_fb",
@@ -162,6 +172,10 @@ export const sources: Source[] = [
     phoneSafeInPublic: true,
     dmFirstPreferred: false,
     secondResponderWorks: true,
+    assignedTeamMemberId: "tm_rob",
+    lastCheckedAt: "2026-05-16T16:00:00Z",
+    checkFrequency: "Daily",
+    notes: "Phone is okay if the thread is not already crowded.",
   },
 ];
 

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPathPattern =
   /^\/(dashboard|opportunities|sources|settings)(?:\/|$)/;
-const protectedApiPattern = /^\/api\/(opportunities|replies)(?:\/|$)/;
+const protectedApiPattern = /^\/api\/(opportunities|replies|browser-import)(?:\/|$)/;
 
 function isDemoAuthEnabled() {
   return (
@@ -86,5 +86,6 @@ export const config = {
     "/settings/:path*",
     "/api/opportunities/:path*",
     "/api/replies/:path*",
+    "/api/browser-import/:path*",
   ],
 };

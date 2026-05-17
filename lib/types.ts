@@ -204,6 +204,30 @@ export type Source = {
   phoneSafeInPublic: boolean;
   dmFirstPreferred: boolean;
   secondResponderWorks: boolean;
+  assignedTeamMemberId?: string;
+  lastCheckedAt?: string;
+  checkFrequency?: string;
+  notes?: string;
+};
+
+export type BrowserImportStatus = "pending_review" | "saved_as_lead" | "ignored";
+
+export type BrowserImport = {
+  id: string;
+  businessId: string;
+  source: "facebook_browser_assist";
+  groupName: string;
+  groupUrl?: string;
+  postUrl?: string;
+  posterName?: string;
+  postText: string;
+  visibleComments: string[];
+  importedByTeamMemberId?: string;
+  textHash: string;
+  duplicateOf?: string;
+  status: BrowserImportStatus;
+  analysis: Record<string, unknown>;
+  createdAt: string;
 };
 
 export type AiAnalysis = {
