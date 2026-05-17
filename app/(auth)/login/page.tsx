@@ -89,6 +89,12 @@ export default async function LoginPage({
           Open public scrubbed-lead demo
         </Link>
       </p>
+      <p className="mt-2 text-center text-sm text-slate-600">
+        Or show sample posts with reply choices:{" "}
+        <Link href="/demo/example-posts" className="font-bold text-blue-700">
+          Open example posts demo
+        </Link>
+      </p>
     </section>
   );
 }

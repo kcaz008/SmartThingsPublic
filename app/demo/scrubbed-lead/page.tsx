@@ -48,6 +48,12 @@ export default function ScrubbedLeadDemoPage() {
           >
             Back to app
           </Link>
+          <Link
+            href="/demo/example-posts"
+            className="inline-flex rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white"
+          >
+            See example posts
+          </Link>
         </div>
 
         <section className="grid gap-6 xl:grid-cols-[1fr_24rem]">
