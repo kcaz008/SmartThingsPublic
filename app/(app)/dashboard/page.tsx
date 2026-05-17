@@ -162,7 +162,7 @@ export default async function DashboardPage() {
         />
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
-            Follow-ups by employee
+            Follow-ups by owner/team
           </p>
           <div className="mt-4 space-y-3">
             {analytics.followUpsByEmployee.length ? (
@@ -190,12 +190,12 @@ export default async function DashboardPage() {
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <DemoLink
             href="/opportunities/opp_ac_not_cooling"
-            title="Rob replied first; Maria should follow"
+            title="Company replied first; personal follow-up"
             helper="Competitor commented after our first company reply."
           />
           <DemoLink
             href="/opportunities/opp_second_opinion"
-            title="Avery copied but did not post"
+            title="Copied but not posted"
             helper="Shows copied draft, no posted confirmation."
           />
           <DemoLink

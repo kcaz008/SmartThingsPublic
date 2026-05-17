@@ -130,7 +130,7 @@ To also verify login for a test user, set `CHECK_USER_EMAIL` and
 - Company Knowledge Settings: service areas, services offered, emergency
   availability, brands serviced, financing, warranty notes, preferred tone, and
   phrases to avoid
-- Reputation Memory: tone, conversion, employee, and group-promotion learnings
+- Reputation Memory: tone, conversion, team-profile, and group-promotion learnings
   used as AI drafting guidance
 - Connected Accounts: team profiles, safe Meta OAuth placeholders, Facebook
   group/page status, and manual Facebook demo reply history with duplicate

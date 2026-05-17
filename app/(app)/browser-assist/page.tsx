@@ -140,8 +140,8 @@ export default async function BrowserAssistPage() {
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {[
                 "Already imported",
-                "Already replied by Rob",
-                "Maria assigned",
+                "Already replied by company account",
+                "Account owner assigned",
                 "Customer already booked",
                 "Competitor commented after us",
               ].map((item) => (
@@ -164,7 +164,7 @@ export default async function BrowserAssistPage() {
                 ["Comment count", "14 visible comments"],
                 ["Timestamp", "Today, 12:04 PM"],
                 ["Competitors mentioned", "Cool Breeze"],
-                ["Our team mentions", "Rob replied publicly"],
+                ["Our team mentions", "Company account replied publicly"],
                 ["Phone numbers posted", "(516) 777-0242"],
                 ["Visible comments", "Selected comments only"],
               ].map(([label, value]) => (
@@ -186,8 +186,8 @@ export default async function BrowserAssistPage() {
             </p>
             <div className="mt-5 space-y-3">
               {[
-                "Step 1: Rob posts soft public comment",
-                "Step 2: Maria DMs if customer reacts",
+                "Step 1: Company account posts soft public comment",
+                "Step 2: Account owner DMs if customer reacts",
                 "Step 3: Follow up if 5+ comments happen after us",
                 "Step 4: Mark booked/lost",
               ].map((step) => (
@@ -227,7 +227,7 @@ export default async function BrowserAssistPage() {
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
               Daily group checklist
             </p>
-            <h2 className="mt-2 text-xl font-black text-slate-950">Rob</h2>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Account owner</h2>
             <div className="mt-4 space-y-3">
               {[
                 ["Huntington Homeowners", "check now"],

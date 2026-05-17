@@ -140,7 +140,7 @@ export default function ExamplePostsDemoPage() {
                       serviceType: post.serviceType,
                       urgency: post.urgency,
                       town: post.town,
-                      secondResponderName: "Maria Lopez",
+                      secondResponderName: "Account owner",
                       ctaPhoneRule: currentBusiness.ctaPhoneRule,
                       phoneSafeInPublic: post.phoneSafeInPublic ?? true,
                     })}

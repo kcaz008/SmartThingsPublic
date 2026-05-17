@@ -158,7 +158,7 @@ export function deriveLeadIntelligence({
     teamMembers.find((member) => member.fullName !== firstResponder && member.role === "dispatcher")
       ?.fullName ??
     teamMembers.find((member) => member.fullName !== firstResponder)?.fullName ??
-    "Assign second responder";
+    "Use a personal follow-up";
   const competitorAfterUs = relevantCompetitors.some(
     (mention) => !mention.mentionedBeforeUs,
   );

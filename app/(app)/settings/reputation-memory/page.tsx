@@ -13,14 +13,14 @@ import { addReputationMemoryAction } from "./actions";
 const memoryTypeLabels = {
   tone_works: "Tone that works",
   reply_converts: "Replies that convert",
-  employee_closes: "Employee closes best",
+  employee_closes: "Team member closes best",
   group_dislikes_promo: "Groups dislike promo",
 };
 
 const memoryTypeHelp = {
   tone_works: "Which wording style earns positive replies.",
   reply_converts: "Specific reply patterns that become booked or won work.",
-  employee_closes: "Which team members tend to close certain opportunities.",
+  employee_closes: "Which owner/team profile tends to close certain opportunities.",
   group_dislikes_promo:
     "Groups or pages where promotional comments hurt performance.",
 };
@@ -133,7 +133,7 @@ export default async function ReputationMemoryPage() {
           ) : (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-sm leading-6 text-slate-600">
               No reputation memory yet. Add notes as you learn which replies,
-              employees, and groups perform best.
+                  team profiles and groups perform best.
             </div>
           )}
         </section>

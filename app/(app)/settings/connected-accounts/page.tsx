@@ -416,7 +416,7 @@ export default async function ConnectedAccountsPage() {
                   name="displayName"
                   required
                   className={inputClassName}
-                  placeholder="Avery Chen"
+                  placeholder="Account Owner"
                 />
               </Field>
               <Field label="External account ID" hint="Optional OAuth field">

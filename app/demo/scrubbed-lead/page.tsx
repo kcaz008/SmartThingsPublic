@@ -20,7 +20,7 @@ export default function ScrubbedLeadDemoPage() {
     serviceType: opportunity.serviceType,
     urgency: opportunity.urgency,
     town: opportunity.detectedTown,
-    secondResponderName: "Maria Lopez",
+    secondResponderName: "Account owner",
     ctaPhoneRule: currentBusiness.ctaPhoneRule,
     phoneSafeInPublic: source?.phoneSafeInPublic,
   });
