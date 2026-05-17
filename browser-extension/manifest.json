@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "LocalSignal Browser Assist",
+  "version": "0.1.0",
+  "description": "Highlights visible Facebook HVAC leads and imports selected posts into LocalSignal.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "https://www.facebook.com/*",
+    "https://facebook.com/*",
+    "http://localhost:3000/*",
+    "https://*.trycloudflare.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LocalSignal Browser Assist"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.facebook.com/*", "https://facebook.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

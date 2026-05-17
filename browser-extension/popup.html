@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LocalSignal Browser Assist</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">LocalSignal</p>
+      <h1>Browser Assist</h1>
+      <p class="copy">
+        Scan the Facebook posts currently visible on this page. You choose what
+        gets imported; LocalSignal never stores Facebook passwords or posts for
+        you.
+      </p>
+
+      <label>
+        LocalSignal URL
+        <input id="baseUrl" placeholder="http://localhost:3000" />
+      </label>
+
+      <button id="saveUrl" class="secondary">Save URL</button>
+      <button id="scan">Highlight visible leads</button>
+      <button id="import">Import selected leads</button>
+
+      <p id="status" class="status">Ready.</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
