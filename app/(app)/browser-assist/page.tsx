@@ -116,12 +116,163 @@ export default async function BrowserAssistPage() {
             disabled
             className="rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white opacity-70"
           >
-            Import selected
+            Review detected posts
+          </button>
+          <button
+            type="button"
+            disabled
+            className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-signal-blue opacity-80 ring-1 ring-blue-100"
+          >
+            Import 5 detected leads
           </button>
           <span className="rounded-2xl bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-900">
             Future extension button - user-initiated only
           </span>
         </div>
+      </section>
+
+      <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_24rem]">
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Auto-dedupe before import
+            </p>
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {[
+                "Already imported",
+                "Already replied by Rob",
+                "Maria assigned",
+                "Customer already booked",
+                "Competitor commented after us",
+              ].map((item) => (
+                <div key={item} className="rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Auto-extracted fields
+            </p>
+            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {[
+                ["Group name", "Garden City Moms & Neighbors"],
+                ["Post URL", "facebook.com/groups/.../posts/8842"],
+                ["Poster name", "Jen K."],
+                ["Comment count", "14 visible comments"],
+                ["Timestamp", "Today, 12:04 PM"],
+                ["Competitors mentioned", "Cool Breeze"],
+                ["Our team mentions", "Rob replied publicly"],
+                ["Phone numbers posted", "(516) 777-0242"],
+                ["Visible comments", "Selected comments only"],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-slate-800">
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Reply ladder autoplan
+            </p>
+            <div className="mt-5 space-y-3">
+              {[
+                "Step 1: Rob posts soft public comment",
+                "Step 2: Maria DMs if customer reacts",
+                "Step 3: Follow up if 5+ comments happen after us",
+                "Step 4: Mark booked/lost",
+              ].map((step) => (
+                <div key={step} className="rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-900">
+                  {step}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Copy-to-Facebook helper
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {[
+                "Copy public reply",
+                "Copy DM",
+                "Open Facebook post",
+                "Mark posted",
+              ].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  disabled
+                  className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-700 opacity-80 ring-1 ring-slate-200"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <aside className="space-y-6">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Daily group checklist
+            </p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">Rob</h2>
+            <div className="mt-4 space-y-3">
+              {[
+                ["Huntington Homeowners", "check now"],
+                ["Massapequa Moms", "checked 2h ago"],
+                ["Garden City Neighbors", "overdue"],
+              ].map(([group, status]) => (
+                <div key={group} className="rounded-2xl bg-slate-50 p-4">
+                  <p className="font-bold text-slate-900">{group}</p>
+                  <p className="mt-1 text-sm capitalize text-slate-500">
+                    {status}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              disabled
+              className="mt-4 w-full rounded-2xl bg-signal-blue px-5 py-3 text-sm font-bold text-white opacity-70"
+            >
+              Open next group
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Follow-up reminders
+            </p>
+            <div className="mt-4 space-y-3">
+              {[
+                "Recheck this thread in 2 hours",
+                "Recheck tomorrow morning",
+                "Follow up if no customer response",
+              ].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  disabled
+                  className="w-full rounded-2xl bg-slate-50 p-4 text-left text-sm font-semibold text-slate-700 opacity-80"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-[1fr_26rem]">
