@@ -36,6 +36,8 @@ export default async function ClientsPage() {
         }
       />
 
+      <ClientMessages />
+
       <div className="grid gap-6 xl:grid-cols-[1fr_24rem]">
         <section className="space-y-5">
           {businesses.map((business) => {
@@ -238,5 +240,18 @@ export default async function ClientsPage() {
         </aside>
       </div>
     </>
+  );
+}
+
+function ClientMessages() {
+  return (
+    <div className="mb-6 rounded-3xl border border-blue-100 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
+      <p className="font-bold">Client management is active.</p>
+      <p className="mt-1">
+        If creating a client does not appear immediately, apply the latest
+        Supabase migrations for brand colors. The form also falls back to
+        creating clients without color until that column exists.
+      </p>
+    </div>
   );
 }

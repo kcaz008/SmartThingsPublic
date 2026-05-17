@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { recommendedKeywords } from "@/lib/default-keywords";
 import { requireAuthContext } from "@/lib/auth";
 import { logAuditEvent } from "@/lib/audit";
@@ -28,9 +29,7 @@ export async function addClientBusinessAction(formData: FormData) {
     return;
   }
 
-  const { data } = await supabase
-    .from("businesses")
-    .insert({
+  const payload = {
       name,
       phone,
       website,
@@ -41,9 +40,37 @@ export async function addClientBusinessAction(formData: FormData) {
       cta_phone_rule: "usually_include_phone",
       tracking_phone: phone || null,
       autopilot_mode: "draft_only",
-    })
+  };
+
+  let { data, error } = await supabase
+    .from("businesses")
+    .insert(payload)
     .select("id")
     .single();
+
+  if (error?.message.includes("brand_color")) {
+    const fallbackPayload = {
+      name: payload.name,
+      phone: payload.phone,
+      website: payload.website,
+      service_area: payload.service_area,
+      tone_rules: payload.tone_rules,
+      cta_phone_rule: payload.cta_phone_rule,
+      tracking_phone: payload.tracking_phone,
+      autopilot_mode: payload.autopilot_mode,
+    };
+    const fallback = await supabase
+      .from("businesses")
+      .insert(fallbackPayload)
+      .select("id")
+      .single();
+    data = fallback.data;
+    error = fallback.error;
+  }
+
+  if (error) {
+    redirect(`/settings/clients?error=${encodeURIComponent(error.message)}`);
+  }
 
   if (data?.id) {
     await supabase.from("target_keywords").upsert(
@@ -66,6 +93,7 @@ export async function addClientBusinessAction(formData: FormData) {
 
   revalidatePath("/settings/clients");
   revalidatePath("/dashboard");
+  redirect("/settings/clients?created=1");
 }
 
 export async function addClientKeywordAction(formData: FormData) {
@@ -99,6 +127,7 @@ export async function addClientKeywordAction(formData: FormData) {
   });
 
   revalidatePath("/settings/clients");
+  redirect("/settings/clients?keyword=1");
 }
 
 export async function addRecommendedKeywordsToClientAction(formData: FormData) {
@@ -132,4 +161,5 @@ export async function addRecommendedKeywordsToClientAction(formData: FormData) {
   });
 
   revalidatePath("/settings/clients");
+  redirect("/settings/clients?recommended=1");
 }

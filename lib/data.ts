@@ -216,6 +216,11 @@ export async function getBusiness(businessId: string | null) {
     .eq("id", businessId)
     .single<BusinessRow>();
 
+  if (error?.message.includes("brand_color")) {
+    const fallback = await getBusinessWithoutBrandColor(supabase, businessId);
+    return fallback ?? sampleBusiness;
+  }
+
   if (error || !data) {
     return sampleBusiness;
   }
@@ -236,11 +241,44 @@ export async function listBusinesses() {
     .order("name")
     .returns<BusinessRow[]>();
 
+  if (error?.message.includes("brand_color")) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("businesses")
+      .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
+      .order("name")
+      .returns<Omit<BusinessRow, "brand_color">[]>();
+
+    if (fallbackError || !fallbackData) {
+      return [];
+    }
+
+    return fallbackData.map((row) =>
+      mapBusiness({ ...row, brand_color: null }),
+    );
+  }
+
   if (error || !data) {
     return [];
   }
 
   return data.map(mapBusiness);
+}
+
+async function getBusinessWithoutBrandColor(
+  supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseDataClient>>>,
+  businessId: string,
+) {
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
+    .eq("id", businessId)
+    .single<Omit<BusinessRow, "brand_color">>();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return mapBusiness({ ...data, brand_color: null });
 }
 
 export async function listSources(businessId: string | null) {
