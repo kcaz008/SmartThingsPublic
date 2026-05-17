@@ -18,6 +18,7 @@ import {
 import { formatDateTime, summarizeText } from "@/lib/format";
 import { deriveLeadIntelligence } from "@/lib/lead-intelligence";
 import { buildReplyVariants } from "@/lib/reply-variants";
+import { scrubOpportunityForAction } from "@/lib/scrub-lead";
 import { reviewReplyAction } from "./actions";
 
 export default async function OpportunityDetailPage({
@@ -79,6 +80,7 @@ export default async function OpportunityDetailPage({
     reply,
     intelligence,
   });
+  const scrubbedLead = scrubOpportunityForAction(opportunity, source);
 
   return (
     <>
@@ -175,6 +177,36 @@ export default async function OpportunityDetailPage({
                 Open original post
               </a>
             ) : null}
+          </div>
+
+          <div className="rounded-3xl border border-emerald-100 bg-white p-6 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-600">
+              Scrubbed actionable item
+            </p>
+            <h2 className="mt-2 text-xl font-black text-slate-950">
+              {scrubbedLead.actionableItem}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {scrubbedLead.whyItMatters}
+            </p>
+            <div className="mt-5 rounded-3xl bg-emerald-50 p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                Cleaned post
+              </p>
+              <p className="mt-3 text-sm leading-7 text-slate-800">
+                {scrubbedLead.cleanedPost}
+              </p>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {scrubbedLead.removedDetails.map((detail) => (
+                <span
+                  key={detail}
+                  className="rounded-full bg-white px-3 py-2 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100"
+                >
+                  Removed: {detail}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">

@@ -279,6 +279,23 @@ export const opportunities: Opportunity[] = [
     status: "drafted",
     createdAt: "2026-05-16T13:40:00Z",
   },
+  {
+    id: "opp_scrubbed_demo",
+    businessId: currentBusiness.id,
+    sourceId: "src_garden_city_fb",
+    postUrl: "https://facebook.com/groups/garden-city-neighbors/posts/8842",
+    authorName: "Jen K.",
+    detectedTown: "Garden City",
+    serviceType: "HVAC Repair",
+    urgency: "high",
+    leadScore: 93,
+    sentiment: "stressed",
+    intentType: "urgent_repair",
+    originalText:
+      "Admin delete if not allowed. My central AC died and the baby room is 83. We are at 124 Maple Street and I accidentally posted my cell 516-333-0188 before. Please don't blast me with sales comments, but I need someone reliable tonight. Email is jen.k@example.com if needed.",
+    status: "drafted",
+    createdAt: "2026-05-16T14:12:00Z",
+  },
 ];
 
 export const aiReplies: AiReply[] = [
@@ -311,6 +328,16 @@ export const aiReplies: AiReply[] = [
     createdAt: "2026-05-16T13:41:00Z",
     draftText:
       "If it is freezing over again, shut it down long enough to thaw and check airflow at the filter/return. Repeated icing usually needs a real diagnosis.",
+  },
+  {
+    id: "reply_scrubbed_demo",
+    opportunityId: "opp_scrubbed_demo",
+    approved: false,
+    copied: false,
+    postedManually: false,
+    createdAt: "2026-05-16T14:13:00Z",
+    draftText:
+      "Sorry you are dealing with that heat, especially with a baby room involved. If the system is not cooling at all, airflow and the outdoor unit are worth checking first. Happy to help point you in the right direction without piling on sales comments.",
   },
 ];
 

@@ -83,6 +83,12 @@ export default async function LoginPage({
           Create one
         </Link>
       </p>
+      <p className="mt-3 text-center text-sm text-slate-600">
+        Want to show someone the workflow?{" "}
+        <Link href="/demo/scrubbed-lead" className="font-bold text-blue-700">
+          Open public scrubbed-lead demo
+        </Link>
+      </p>
     </section>
   );
 }

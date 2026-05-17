@@ -218,6 +218,11 @@ export default async function DashboardPage() {
             title="Phone already posted"
             helper="Next draft avoids repeating the phone number."
           />
+          <DemoLink
+            href="/opportunities/opp_scrubbed_demo"
+            title="Scrubbed actionable item"
+            helper="Noisy post gets cleaned before choosing AI replies."
+          />
         </div>
       </section>
 

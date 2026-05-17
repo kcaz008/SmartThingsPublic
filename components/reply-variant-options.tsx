@@ -34,12 +34,19 @@ function ReplyVariantCard({
   onSelected: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [rewriteCount, setRewriteCount] = useState(0);
+  const displayedReply = rewriteReply(variant.reply, rewriteCount);
 
   async function useReply() {
-    await navigator.clipboard.writeText(variant.reply);
+    await navigator.clipboard.writeText(displayedReply);
     onSelected();
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2200);
+  }
+
+  function recreateAi() {
+    setRewriteCount((current) => current + 1);
+    setCopied(false);
   }
 
   return (
@@ -63,7 +70,7 @@ function ReplyVariantCard({
       <p className="mt-1 text-xs font-semibold leading-5 text-blue-900/70">
         {variant.description}
       </p>
-      <p className="mt-4 text-sm leading-7 text-slate-800">{variant.reply}</p>
+      <p className="mt-4 text-sm leading-7 text-slate-800">{displayedReply}</p>
       <button
         type="button"
         onClick={useReply}
@@ -75,9 +82,30 @@ function ReplyVariantCard({
       >
         {copied ? "Copied - paste it now" : "Use this reply"}
       </button>
+      <button
+        type="button"
+        onClick={recreateAi}
+        className="mt-2 w-full rounded-2xl bg-white px-4 py-3 text-sm font-bold text-signal-blue ring-1 ring-blue-100 transition hover:bg-blue-50"
+      >
+        Recreate AI
+      </button>
       <p className="mt-2 text-xs leading-5 text-slate-500">
         One click copies this option so you can paste it into Facebook or DM.
       </p>
     </article>
   );
+}
+
+function rewriteReply(reply: string, count: number) {
+  if (count === 0) {
+    return reply;
+  }
+
+  const rewrites = [
+    reply.replace(/^Sorry you are dealing with that/, "That sounds frustrating"),
+    reply.replace(/Happy to help/g, "I can help").replace(/if you still need someone/gi, "if useful"),
+    reply.replace(/A quick check/g, "The first thing I would check").replace(/Call or text/g, "You can call or text"),
+  ];
+
+  return rewrites[(count - 1) % rewrites.length] ?? reply;
 }
