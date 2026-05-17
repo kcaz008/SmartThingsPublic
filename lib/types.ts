@@ -78,6 +78,7 @@ export type Business = {
   phrasesToAvoid: string;
   ctaPhoneRule: CtaPhoneRule;
   trackingPhone?: string;
+  brandColor: string;
 };
 
 export type TargetKeyword = {

@@ -1,4 +1,7 @@
-import { createSupabaseServerClient } from "@/lib/supabase";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceClient,
+} from "@/lib/supabase";
 import { recommendedKeywords } from "@/lib/default-keywords";
 import {
   aiReplies as sampleReplies,
@@ -42,6 +45,7 @@ type BusinessRow = {
   phrases_to_avoid: string | null;
   cta_phone_rule: Business["ctaPhoneRule"] | null;
   tracking_phone: string | null;
+  brand_color: string | null;
 };
 
 type SourceRow = {
@@ -192,8 +196,12 @@ type CompetitorMentionRow = {
   created_at: string;
 };
 
+async function createSupabaseDataClient() {
+  return createSupabaseServiceClient() ?? (await createSupabaseServerClient());
+}
+
 export async function getBusiness(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return (
@@ -204,7 +212,7 @@ export async function getBusiness(businessId: string | null) {
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone,brand_color")
     .eq("id", businessId)
     .single<BusinessRow>();
 
@@ -216,7 +224,7 @@ export async function getBusiness(businessId: string | null) {
 }
 
 export async function listBusinesses() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase) {
     return sampleBusinesses;
@@ -224,7 +232,7 @@ export async function listBusinesses() {
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone")
+    .select("id,name,service_area,tone_rules,phone,website,autopilot_mode,services_offered,emergency_availability,brands_serviced,financing_options,warranty_notes,preferred_tone,phrases_to_avoid,cta_phone_rule,tracking_phone,brand_color")
     .order("name")
     .returns<BusinessRow[]>();
 
@@ -236,7 +244,7 @@ export async function listBusinesses() {
 }
 
 export async function listSources(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleSources.filter((source) => source.businessId === businessId);
@@ -258,7 +266,7 @@ export async function listSources(businessId: string | null) {
 }
 
 export async function listOpportunities(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleOpportunities.filter(
@@ -286,7 +294,7 @@ export async function getOpportunity(
   businessId: string | null,
   opportunityId: string,
 ) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleOpportunities.find(
@@ -315,7 +323,7 @@ export async function getReplyForOpportunity(
   businessId: string | null,
   opportunityId: string,
 ) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleReplies.find((reply) => reply.opportunityId === opportunityId);
@@ -339,7 +347,7 @@ export async function getReplyForOpportunity(
 }
 
 export async function getSource(businessId: string | null, sourceId: string) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleSources.find(
@@ -362,7 +370,7 @@ export async function getSource(businessId: string | null, sourceId: string) {
 }
 
 export async function listTargetKeywords(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return recommendedKeywords.map((keyword, index) => ({
@@ -388,7 +396,7 @@ export async function listTargetKeywords(businessId: string | null) {
 }
 
 export async function listConnectedAccounts(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return [] satisfies ConnectedAccount[];
@@ -411,7 +419,7 @@ export async function listConnectedAccounts(businessId: string | null) {
 }
 
 export async function listTeamMembers(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleTeamMembers.filter((member) => member.businessId === businessId);
@@ -435,7 +443,7 @@ export async function listTeamMembers(businessId: string | null) {
 }
 
 export async function listFacebookManualPosts(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return [] satisfies FacebookManualPost[];
@@ -459,7 +467,7 @@ export async function listFacebookManualPosts(businessId: string | null) {
 }
 
 export async function listFacebookReplyHistory(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleFacebookReplyHistory.filter(
@@ -485,7 +493,7 @@ export async function listFacebookReplyHistory(businessId: string | null) {
 }
 
 export async function listAuditLogs(businessId: string | null, limit = 10) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return [] satisfies AuditLog[];
@@ -509,7 +517,7 @@ export async function listAuditLogs(businessId: string | null, limit = 10) {
 }
 
 export async function listReputationMemories(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return [] satisfies ReputationMemory[];
@@ -534,7 +542,7 @@ export async function listReputationMemories(businessId: string | null) {
 }
 
 export async function listCompetitorMentions(businessId: string | null) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseDataClient();
 
   if (!supabase || !businessId) {
     return sampleCompetitorMentions.filter(
@@ -592,6 +600,7 @@ function mapBusiness(row: BusinessRow): Business {
     phrasesToAvoid: row.phrases_to_avoid ?? "",
     ctaPhoneRule: row.cta_phone_rule ?? "usually_include_phone",
     trackingPhone: row.tracking_phone ?? undefined,
+    brandColor: row.brand_color ?? "#2563eb",
   };
 }
 

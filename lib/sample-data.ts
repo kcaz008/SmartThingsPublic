@@ -33,6 +33,7 @@ export const currentBusiness: Business = {
     "Best in town, cheapest, call now, guaranteed today, we beat any price.",
   ctaPhoneRule: "no_cta_if_promo_sensitive",
   trackingPhone: "(516) 777-0242",
+  brandColor: "#2563eb",
 };
 
 export const businesses: Business[] = [
@@ -55,6 +56,7 @@ export const businesses: Business[] = [
     phrasesToAvoid: "Cheap, guaranteed, emergency promise.",
     ctaPhoneRule: "dm_only",
     trackingPhone: "(516) 555-0134",
+    brandColor: "#0f766e",
   },
 ];
 

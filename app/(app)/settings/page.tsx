@@ -207,6 +207,15 @@ export default async function SettingsPage() {
                   defaultValue={currentBusiness.trackingPhone ?? ""}
                 />
               </Field>
+              <Field label="Brand color">
+                <input
+                  name="brandColor"
+                  type="color"
+                  disabled={!canEdit}
+                  defaultValue={currentBusiness.brandColor}
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-2 py-2 disabled:opacity-60"
+                />
+              </Field>
             </div>
           </section>
 
@@ -233,6 +242,22 @@ export default async function SettingsPage() {
             <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-semibold capitalize text-slate-700">
               Role: {authContext.role}
             </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+              Clients & brands
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Add businesses, assign color themes, and manage AI keywords per
+              client.
+            </p>
+            <Link
+              href="/settings/clients"
+              className="mt-4 inline-flex rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50"
+            >
+              Manage clients
+            </Link>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">

@@ -30,16 +30,22 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
   return {
     user,
-    businessId:
+    businessId: await resolveActiveBusinessId(
       typeof user.app_metadata?.business_id === "string"
         ? user.app_metadata.business_id
         : null,
+    ),
     role: normalizeRole(user.app_metadata?.role),
     fullName:
       typeof user.user_metadata?.full_name === "string"
         ? user.user_metadata.full_name
         : user.email ?? "LocalSignal user",
   };
+}
+
+async function resolveActiveBusinessId(fallbackBusinessId: string | null) {
+  const cookieStore = await cookies();
+  return cookieStore.get("localsignal_active_business_id")?.value ?? fallbackBusinessId;
 }
 
 export function isDemoAuthEnabled() {

@@ -57,6 +57,7 @@ export async function updateBusinessSettingsAction(formData: FormData) {
       ? ctaPhoneRule
       : "usually_include_phone",
     tracking_phone: String(formData.get("trackingPhone") ?? "").trim(),
+    brand_color: String(formData.get("brandColor") ?? "#2563eb").trim(),
   };
 
   if (!payload.name || !payload.service_area || !payload.tone_rules) {

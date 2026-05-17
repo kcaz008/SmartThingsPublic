@@ -6,12 +6,13 @@ import { getBusiness, listBusinesses } from "@/lib/data";
 import { requireAuthContext } from "@/lib/auth";
 
 const navigation = [
-  { href: "/dashboard", label: "Dashboard", icon: "Command" },
-  { href: "/opportunities/new", label: "Add Opportunity", icon: "Plus" },
-  { href: "/sources", label: "Sources", icon: "Radar" },
-  { href: "/settings", label: "Settings", icon: "Gear" },
-  { href: "/settings/reputation-memory", label: "Memory", icon: "Brain" },
-  { href: "/settings/connected-accounts", label: "Connections", icon: "Link" },
+  { href: "/dashboard", label: "Dashboard", icon: "★", featured: true },
+  { href: "/opportunities/new", label: "Add Opportunity", icon: "+" },
+  { href: "/sources", label: "Sources", icon: "◎" },
+  { href: "/settings", label: "Settings", icon: "⚙" },
+  { href: "/settings/clients", label: "Clients", icon: "◆" },
+  { href: "/settings/reputation-memory", label: "Memory", icon: "◉" },
+  { href: "/settings/connected-accounts", label: "Connections", icon: "↗" },
 ];
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex h-full flex-col">
           <div className="border-b border-white/10 px-6 py-6">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="grid size-11 place-items-center rounded-2xl bg-white text-lg font-black text-signal-navy">
+              <div
+                className="grid size-11 place-items-center rounded-2xl text-lg font-black text-white"
+                style={{ backgroundColor: currentBusiness.brandColor }}
+              >
                 LS
               </div>
               <div>
@@ -42,9 +46,19 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex min-w-max items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white"
+                className={`group flex min-w-max items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  item.featured
+                    ? "border border-white/30 bg-white text-signal-navy shadow-lg"
+                    : "text-slate-200 hover:bg-white/10 hover:text-white"
+                }`}
               >
-                <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-xs text-slate-200 group-hover:bg-white/15">
+                <span
+                  className={`grid size-9 place-items-center rounded-xl text-sm font-black ${
+                    item.featured
+                      ? "bg-signal-blue text-white"
+                      : "bg-white/10 text-slate-200 group-hover:bg-white/15"
+                  }`}
+                >
                   {item.icon}
                 </span>
                 {item.label}

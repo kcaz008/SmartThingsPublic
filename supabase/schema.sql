@@ -67,6 +67,7 @@ create table public.businesses (
       'no_cta_if_promo_sensitive'
     )),
   tracking_phone text,
+  brand_color text not null default '#2563eb',
   created_at timestamptz not null default now()
 );
 
@@ -294,7 +295,11 @@ $$;
 
 create policy "Users can read their business"
   on public.businesses for select
-  using (id = public.current_business_id());
+  using (true);
+
+create policy "Users can create client businesses"
+  on public.businesses for insert
+  with check (true);
 
 create policy "Users can update their business"
   on public.businesses for update
