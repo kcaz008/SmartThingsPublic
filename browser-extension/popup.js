@@ -19,6 +19,18 @@ document.getElementById("scan").addEventListener("click", async () => {
   });
 });
 
+document.getElementById("guidedScan").addEventListener("click", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  statusText.textContent = "Guided scan running...";
+  chrome.tabs.sendMessage(
+    tab.id,
+    { type: "LOCALSIGNAL_GUIDED_SCAN", screens: 5 },
+    (response) => {
+      statusText.textContent = `${response?.count || 0} lead-like posts found after guided scan.`;
+    },
+  );
+});
+
 document.getElementById("import").addEventListener("click", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   chrome.tabs.sendMessage(
@@ -27,6 +39,19 @@ document.getElementById("import").addEventListener("click", async () => {
     (response) => {
       statusText.textContent = response?.ok
         ? `Imported ${response.count} selected post(s) for LocalSignal review.`
+        : response?.message || "Nothing imported.";
+    },
+  );
+});
+
+document.getElementById("importAll").addEventListener("click", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  chrome.tabs.sendMessage(
+    tab.id,
+    { type: "LOCALSIGNAL_IMPORT_ALL" },
+    (response) => {
+      statusText.textContent = response?.ok
+        ? `Imported ${response.count} detected post(s) for review.`
         : response?.message || "Nothing imported.";
     },
   );

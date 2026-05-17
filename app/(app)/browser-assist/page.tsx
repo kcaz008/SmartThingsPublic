@@ -123,6 +123,13 @@ export default async function BrowserAssistPage() {
             disabled
             className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-signal-blue opacity-80 ring-1 ring-blue-100"
           >
+            Guided scan next 5 screens
+          </button>
+          <button
+            type="button"
+            disabled
+            className="rounded-2xl bg-white px-5 py-3 text-sm font-bold text-signal-blue opacity-80 ring-1 ring-blue-100"
+          >
             Import 5 detected leads
           </button>
           <span className="rounded-2xl bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-900">

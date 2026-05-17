@@ -12,7 +12,9 @@ Browser Assist workflow.
   - Competitor mentioned
   - Reply recommended
   - Avoid — promo-sensitive
+- Can run a user-started guided scan through the next few screens.
 - Lets the employee choose/import selected visible posts.
+- Can import all detected posts after the employee starts the action.
 - Sends selected post text to LocalSignal:
   - `POST /api/browser-import/facebook`
 - Opens LocalSignal Browser Assist for review.
@@ -39,8 +41,13 @@ Browser Assist workflow.
    - local: `http://localhost:3000`
    - tunnel: `https://YOUR-TUNNEL.trycloudflare.com`
 7. Open a Facebook group you already have access to.
-8. Click **Highlight visible leads**.
-9. Click **Import selected leads**.
+8. Click **Highlight visible leads** for the current screen, or
+   **Guided scan next 5 screens** to let the page scroll and detect likely
+   leads.
+9. Review the highlights/checkmarks.
+10. Click **Import selected leads** or **Import all detected leads**.
+
+The import still opens LocalSignal for review before the team takes action.
 
 ## Notes
 

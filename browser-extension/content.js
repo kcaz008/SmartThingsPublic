@@ -41,8 +41,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ count: state.detected.length });
   }
 
+  if (message.type === "LOCALSIGNAL_GUIDED_SCAN") {
+    guidedScan(message.screens || 5).then(sendResponse);
+    return true;
+  }
+
   if (message.type === "LOCALSIGNAL_IMPORT_SELECTED") {
     importSelectedPosts().then(sendResponse);
+    return true;
+  }
+
+  if (message.type === "LOCALSIGNAL_IMPORT_ALL") {
+    importAllDetectedPosts().then(sendResponse);
     return true;
   }
 
@@ -54,15 +64,14 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 function scanVisiblePosts() {
-  clearExistingBadges();
+  clearVisualHighlights();
   const candidates = getPostCandidates();
-  state.detected = [];
 
   candidates.forEach((node, index) => {
     const text = normalizeText(node.innerText || "");
     const classification = classifyPost(text);
 
-    if (!classification) {
+    if (!classification || state.detected.some((item) => item.text === text)) {
       return;
     }
 
@@ -74,6 +83,20 @@ function scanVisiblePosts() {
   });
 
   renderToolbar();
+}
+
+async function guidedScan(screens = 5) {
+  clearExistingBadges();
+
+  for (let index = 0; index < screens; index += 1) {
+    scanVisiblePosts();
+    window.scrollBy({ top: Math.floor(window.innerHeight * 0.85), behavior: "smooth" });
+    await wait(900);
+  }
+
+  scanVisiblePosts();
+  renderToolbar();
+  return { count: state.detected.length };
 }
 
 function getPostCandidates() {
@@ -163,10 +186,23 @@ function renderToolbar() {
   const count = document.createElement("span");
   count.textContent = `${state.detected.length} detected`;
 
+  const scanMore = document.createElement("button");
+  scanMore.textContent = "Guided scan";
+  scanMore.className = "secondary";
+  scanMore.addEventListener("click", () => {
+    guidedScan(5);
+  });
+
   const review = document.createElement("button");
-  review.textContent = `Review detected posts`;
+  review.textContent = "Import selected";
   review.addEventListener("click", () => {
     importSelectedPosts();
+  });
+
+  const importAll = document.createElement("button");
+  importAll.textContent = "Import all detected";
+  importAll.addEventListener("click", () => {
+    importAllDetectedPosts();
   });
 
   const clear = document.createElement("button");
@@ -174,7 +210,7 @@ function renderToolbar() {
   clear.className = "secondary";
   clear.addEventListener("click", clearExistingBadges);
 
-  toolbar.append(count, review, clear);
+  toolbar.append(count, scanMore, review, importAll, clear);
   document.body.append(toolbar);
 }
 
@@ -213,14 +249,28 @@ async function importSelectedPosts() {
   return { ok: true, count: results.length, results };
 }
 
-function clearExistingBadges() {
+async function importAllDetectedPosts() {
+  state.detected.forEach((item) => {
+    item.classification.selected = true;
+  });
+  return importSelectedPosts();
+}
+
+function clearExistingBadges(options = {}) {
+  clearVisualHighlights();
+
+  if (!options.keepDetected) {
+    state.detected = [];
+  }
+}
+
+function clearVisualHighlights() {
   document.querySelectorAll("[data-localsignal-badge]").forEach((node) => node.remove());
   document.querySelector("[data-localsignal-toolbar]")?.remove();
   document.querySelectorAll(".localsignal-post-wrap").forEach((node) => {
     node.classList.remove("localsignal-post-wrap");
     delete node.dataset.localsignalId;
   });
-  state.detected = [];
 }
 
 function normalizeText(value) {
@@ -249,4 +299,8 @@ function findVisibleComments(node) {
     .map((comment) => normalizeText(comment.innerText || ""))
     .filter((text) => text.length > 20 && text.length < 600)
     .slice(0, 8);
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
